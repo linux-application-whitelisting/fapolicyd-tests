@@ -1,7 +1,7 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
-#   Makefile of /CoreOS/fapolicyd/Sanity/trust-db
-#   Description: Test for BZ#1817413 (Rebase FAPOLICYD to the latest upstream version)
+#   Makefile of /CoreOS/fapolicyd/Sanity/selinux
+#   Description: Test for BZ#1714529 - SELinux policy (daemons) changes required for package: fapolicyd
 #   Author: Dalibor Pospisil <dapospis@redhat.com>
 #
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -24,7 +24,7 @@
 #
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-export TEST=/CoreOS/fapolicyd/Sanity/trust-db
+export TEST=/CoreOS/fapolicyd/Sanity/selinux
 export TESTVERSION=1.0
 
 BUILT_FILES=
@@ -50,19 +50,19 @@ $(METADATA): Makefile
 	@echo "Name:            $(TEST)" >> $(METADATA)
 	@echo "TestVersion:     $(TESTVERSION)" >> $(METADATA)
 	@echo "Path:            $(TEST_DIR)" >> $(METADATA)
-	@echo "Description:     Test for BZ#1817413 (Rebase FAPOLICYD to the latest upstream version)" >> $(METADATA)
+	@echo "Description:     Test for BZ#1683567 ([RFE] SELinux policy (daemons) changes required)" >> $(METADATA)
 	@echo "Type:            Sanity" >> $(METADATA)
 	@echo "TestTime:        5m" >> $(METADATA)
 	@echo "RunFor:          fapolicyd" >> $(METADATA)
-	@echo "Requires:        fapolicyd" >> $(METADATA)
+	@echo "Requires:        fapolicyd fapolicyd-selinux" >> $(METADATA)
 	@echo "RhtsRequires:    library(distribution/dpcommon)" >> $(METADATA)
-	@echo "RhtsRequires:    library(distribution/ConditionalPhases)" >> $(METADATA)
+	@echo "RhtsRequires:    library(selinux-policy/common)" >> $(METADATA)
 	@echo "RhtsRequires:    library(fapolicyd/common)" >> $(METADATA)
 	@echo "Priority:        Normal" >> $(METADATA)
 	@echo "License:         GPLv2" >> $(METADATA)
 	@echo "Confidential:    no" >> $(METADATA)
 	@echo "Destructive:     no" >> $(METADATA)
-	@echo "Bug:             1817413" >> $(METADATA)
+	@echo "Bug:             1714529 1841518" >> $(METADATA)
 	@echo "Releases:        -RHEL4 -RHELClient5 -RHELServer5" >> $(METADATA)
 
 	rhts-lint $(METADATA)

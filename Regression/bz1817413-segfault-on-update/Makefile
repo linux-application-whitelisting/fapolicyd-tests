@@ -1,7 +1,7 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
-#   Makefile of /CoreOS/fapolicyd/Sanity/trust-db
-#   Description: Test for BZ#1817413 (Rebase FAPOLICYD to the latest upstream version)
+#   Makefile of /CoreOS/fapolicyd/Regression/bz1817413-segfault-on-update
+#   Description: Crash on update of the db while killing the daemon
 #   Author: Dalibor Pospisil <dapospis@redhat.com>
 #
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -24,7 +24,7 @@
 #
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-export TEST=/CoreOS/fapolicyd/Sanity/trust-db
+export TEST=/CoreOS/fapolicyd/Regression/bz1817413-segfault-on-update
 export TESTVERSION=1.0
 
 BUILT_FILES=
@@ -50,13 +50,12 @@ $(METADATA): Makefile
 	@echo "Name:            $(TEST)" >> $(METADATA)
 	@echo "TestVersion:     $(TESTVERSION)" >> $(METADATA)
 	@echo "Path:            $(TEST_DIR)" >> $(METADATA)
-	@echo "Description:     Test for BZ#1817413 (Rebase FAPOLICYD to the latest upstream version)" >> $(METADATA)
-	@echo "Type:            Sanity" >> $(METADATA)
+	@echo "Description:     Crash on update of the db while killing the daemon" >> $(METADATA)
+	@echo "Type:            Regression" >> $(METADATA)
 	@echo "TestTime:        5m" >> $(METADATA)
 	@echo "RunFor:          fapolicyd" >> $(METADATA)
 	@echo "Requires:        fapolicyd" >> $(METADATA)
-	@echo "RhtsRequires:    library(distribution/dpcommon)" >> $(METADATA)
-	@echo "RhtsRequires:    library(distribution/ConditionalPhases)" >> $(METADATA)
+	@echo "RhtsRequires:    library(distribution/Cleanup)" >> $(METADATA)
 	@echo "RhtsRequires:    library(fapolicyd/common)" >> $(METADATA)
 	@echo "Priority:        Normal" >> $(METADATA)
 	@echo "License:         GPLv2" >> $(METADATA)

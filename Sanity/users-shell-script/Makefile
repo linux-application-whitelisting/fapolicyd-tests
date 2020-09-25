@@ -1,7 +1,7 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
-#   Makefile of /CoreOS/fapolicyd/Sanity/trust-db
-#   Description: Test for BZ#1817413 (Rebase FAPOLICYD to the latest upstream version)
+#   Makefile of /CoreOS/fapolicyd/Sanity/users-shell-script
+#   Description: Test for BZ#1801872 (user may run and surce a shell script)
 #   Author: Dalibor Pospisil <dapospis@redhat.com>
 #
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -24,7 +24,7 @@
 #
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-export TEST=/CoreOS/fapolicyd/Sanity/trust-db
+export TEST=/CoreOS/fapolicyd/Sanity/users-shell-script
 export TESTVERSION=1.0
 
 BUILT_FILES=
@@ -50,19 +50,19 @@ $(METADATA): Makefile
 	@echo "Name:            $(TEST)" >> $(METADATA)
 	@echo "TestVersion:     $(TESTVERSION)" >> $(METADATA)
 	@echo "Path:            $(TEST_DIR)" >> $(METADATA)
-	@echo "Description:     Test for BZ#1817413 (Rebase FAPOLICYD to the latest upstream version)" >> $(METADATA)
-	@echo "Type:            Sanity" >> $(METADATA)
+	@echo "Description:     Test for BZ#1801872 (user may run and surce a shell script)" >> $(METADATA)
+	@echo "Type:            Regression" >> $(METADATA)
 	@echo "TestTime:        5m" >> $(METADATA)
 	@echo "RunFor:          fapolicyd" >> $(METADATA)
-	@echo "Requires:        fapolicyd" >> $(METADATA)
+	@echo "Requires:        fapolicyd rpmdevtools rpm-build" >> $(METADATA)
 	@echo "RhtsRequires:    library(distribution/dpcommon)" >> $(METADATA)
-	@echo "RhtsRequires:    library(distribution/ConditionalPhases)" >> $(METADATA)
+	@echo "RhtsRequires:    library(distribution/testUser)" >> $(METADATA)
 	@echo "RhtsRequires:    library(fapolicyd/common)" >> $(METADATA)
 	@echo "Priority:        Normal" >> $(METADATA)
 	@echo "License:         GPLv2" >> $(METADATA)
 	@echo "Confidential:    no" >> $(METADATA)
 	@echo "Destructive:     no" >> $(METADATA)
-	@echo "Bug:             1817413" >> $(METADATA)
-	@echo "Releases:        -RHEL4 -RHELClient5 -RHELServer5" >> $(METADATA)
+	@echo "Bug:             1801872" >> $(METADATA)
+	@echo "Releases:        -RHEL4 -RHEL6 -RHEL7 -RHELClient5 -RHELServer5" >> $(METADATA)
 
 	rhts-lint $(METADATA)

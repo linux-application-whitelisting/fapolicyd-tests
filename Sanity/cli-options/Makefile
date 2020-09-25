@@ -1,6 +1,6 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
-#   Makefile of /CoreOS/fapolicyd/Sanity/trust-db
+#   Makefile of /CoreOS/fapolicyd/Sanity/cli-options
 #   Description: Test for BZ#1817413 (Rebase FAPOLICYD to the latest upstream version)
 #   Author: Dalibor Pospisil <dapospis@redhat.com>
 #
@@ -24,12 +24,12 @@
 #
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-export TEST=/CoreOS/fapolicyd/Sanity/trust-db
+export TEST=/CoreOS/fapolicyd/Sanity/cli-options
 export TESTVERSION=1.0
 
 BUILT_FILES=
 
-FILES=$(METADATA) runtest.sh Makefile PURPOSE
+FILES=$(METADATA) runtest.sh Makefile PURPOSE files/
 
 .PHONY: all install download clean
 

@@ -1,12 +1,12 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
-#   Makefile of /CoreOS/fapolicyd/Sanity/trust-db
-#   Description: Test for BZ#1817413 (Rebase FAPOLICYD to the latest upstream version)
-#   Author: Dalibor Pospisil <dapospis@redhat.com>
+#   Makefile of /CoreOS/fapolicyd/Regression/bz1747494-suspicious-logs-on-service-start
+#   Description: Test for BZ#1747494 (suspicious logs on service start )
+#   Author: Radovan Sroka <rsroka@redhat.com>
 #
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
-#   Copyright (c) 2020 Red Hat, Inc.
+#   Copyright (c) 2019 Red Hat, Inc. All rights reserved.
 #
 #   This copyrighted material is made available to anyone wishing
 #   to use, modify, copy, or redistribute it subject to the terms
@@ -24,12 +24,12 @@
 #
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-export TEST=/CoreOS/fapolicyd/Sanity/trust-db
+export TEST=/CoreOS/fapolicyd/Regression/bz1747494-suspicious-logs-on-service-start
 export TESTVERSION=1.0
 
 BUILT_FILES=
 
-FILES=$(METADATA) runtest.sh Makefile PURPOSE
+FILES=$(METADATA) runtest.sh Makefile PURPOSE alter-database.cpp
 
 .PHONY: all install download clean
 
@@ -46,23 +46,20 @@ clean:
 include /usr/share/rhts/lib/rhts-make.include
 
 $(METADATA): Makefile
-	@echo "Owner:           Dalibor Pospisil <dapospis@redhat.com>" > $(METADATA)
+	@echo "Owner:           Radovan Sroka <rsroka@redhat.com>" > $(METADATA)
 	@echo "Name:            $(TEST)" >> $(METADATA)
 	@echo "TestVersion:     $(TESTVERSION)" >> $(METADATA)
 	@echo "Path:            $(TEST_DIR)" >> $(METADATA)
-	@echo "Description:     Test for BZ#1817413 (Rebase FAPOLICYD to the latest upstream version)" >> $(METADATA)
-	@echo "Type:            Sanity" >> $(METADATA)
+	@echo "Description:     Test for BZ#1747494 (suspicious logs on service start )" >> $(METADATA)
+	@echo "Type:            Regression" >> $(METADATA)
 	@echo "TestTime:        5m" >> $(METADATA)
 	@echo "RunFor:          fapolicyd" >> $(METADATA)
-	@echo "Requires:        fapolicyd" >> $(METADATA)
-	@echo "RhtsRequires:    library(distribution/dpcommon)" >> $(METADATA)
-	@echo "RhtsRequires:    library(distribution/ConditionalPhases)" >> $(METADATA)
+	@echo "Requires:        fapolicyd sed dnf gcc-c++ lmdb-devel" >> $(METADATA)
 	@echo "RhtsRequires:    library(fapolicyd/common)" >> $(METADATA)
 	@echo "Priority:        Normal" >> $(METADATA)
 	@echo "License:         GPLv2" >> $(METADATA)
 	@echo "Confidential:    no" >> $(METADATA)
 	@echo "Destructive:     no" >> $(METADATA)
-	@echo "Bug:             1817413" >> $(METADATA)
-	@echo "Releases:        -RHEL4 -RHELClient5 -RHELServer5" >> $(METADATA)
+	@echo "Bug:             1747494" >> $(METADATA)
 
 	rhts-lint $(METADATA)

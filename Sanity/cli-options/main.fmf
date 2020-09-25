@@ -19,12 +19,12 @@ tag:
 - NoRHEL5
 - SP-TBU
 - TIPfail
-- Tier2
+- Tier1
 - rhel-8.3.0
-tier: '2'
+tier: '1'
 relevancy: |
     distro < rhel-8: False
     distro < rhel-8.3: False
-extra-summary: /CoreOS/fapolicyd/Sanity/trust-db
-extra-task: /CoreOS/fapolicyd/Sanity/trust-db
-extra-nitrate: TC#0607484
+extra-summary: /CoreOS/fapolicyd/Sanity/cli-options
+extra-task: /CoreOS/fapolicyd/Sanity/cli-options
+extra-nitrate: TC#0607379
