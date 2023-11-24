@@ -10,3 +10,4 @@ adjust+:
   - enabled: false
     when: distro < rhel-8.1
     continue: false
+framework: beakerlib
