@@ -1,9 +1,11 @@
-summary: Test for BZ#1887451 (Rebase FAPOLICYD to the latest upstream version)
+summary: Fapolicyd use IMA integrity check
 description: |
+    Scenario where fapolicyd use as integrity check IMA policy.
+    Needed provided setup of IMA policy before test.
     Bug summary: Rebase FAPOLICYD to the latest upstream version
     Bugzilla link: https://bugzilla.redhat.com/show_bug.cgi?id=1887451
 contact:
-- Dalibor Pospisil <dapospis@redhat.com>
+- Patrik Koncity <pkoncity@redhat.com>
 component:
 - fapolicyd
 test: ./runtest.sh
@@ -11,7 +13,7 @@ require+:
 - fapolicyd
 - library(ControlFlow/Cleanup)
 - library(distribution/testUser)
-enabled: false
+- attr
 duration: 5m
 extra-summary: /CoreOS/fapolicyd/Sanity/integrity
 extra-task: /CoreOS/fapolicyd/Sanity/integrity
