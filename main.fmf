@@ -7,7 +7,7 @@ require:
   - fapolicyd
 recommend:
   - fapolicyd-selinux
-adjust+:
+adjust:
   - enabled: false
     when: distro < rhel-8.1
     continue: false
