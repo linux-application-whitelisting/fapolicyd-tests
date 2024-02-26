@@ -15,7 +15,7 @@ tag:
   - Tier1
   - rhel-buildroot
 tier: '1'
-adjust:
+adjust+:
   - enabled: false
     when: distro < rhel-8.4
 link:
