@@ -34,8 +34,8 @@ PACKAGE="fapolicyd"
 
 rlJournalStart && {
   rlPhaseStartSetup && {
-    rlRun "rlImport fapolicyd/common" 0 "Import libraries" || rlDie "cannot continue"
     rlRun "rlImport --all" 0 "Import libraries" || rlDie "cannot continue"
+    rlRun "rlImport ./common" 0 "Import common fapolicyd library" || rlDie "cannot continue"
     if rlIsRHEL '8'; then
       CleanupRegister 'rlRun "RpmSnapshotRevert"; rlRun "RpmSnapshotDiscard"'
       CleanupRegister 'rlRun "dnf -y module reset idm"'

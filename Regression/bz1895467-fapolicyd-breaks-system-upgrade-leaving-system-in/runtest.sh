@@ -41,7 +41,7 @@ PYTHON_SUFFIX=''
 rlJournalStart && {
   rlPhaseStartSetup && {
     rlRun "rlImport --all" 0 "Import libraries" || rlDie "cannot continue"
-    rlRun "rlImport fapolicyd/common" 0 "Import libraries" || rlDie "cannot continue"
+    rlRun "rlImport ./common" 0 "Import common fapolicyd library" || rlDie "cannot continue"
     rlRun "rlCheckRequirements $(rlGetYAMLdeps)" || rlDie 'cannot continue'
     rlRun "rlCheckRequirements $(rlGetYAMLdeps recommend)" 0-255
     rlRun "TmpDir=\$(mktemp -d)" 0 "Creating tmp directory"
