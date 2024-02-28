@@ -11,9 +11,12 @@ extra-hardware: |
     hostrequire = memory>=3700
     hostrequire = disk>=40000
 require+:
+  - name: /Library/vm/RHEL
+    url: https://gitlab.cee.redhat.com/SECENGSP/tests.git
+    type: library
+    ref: main
   - name: /destructive/library
     url: https://github.com/RedHat-SP-Security/fapolicyd-tests
     type: library
-    #path: ../tests
   - library(ControlFlow/Cleanup)
   - library(ControlFlow/SessionControl)

@@ -6,7 +6,10 @@ require+:
   - library(distribution/tcf)
   - library(vm/common)
 recommend:
-  - library(vm/RHEL)
+  - name: /Library/vm/RHEL
+    url: https://gitlab.cee.redhat.com/SECENGSP/tests.git
+    type: library
+    ref: main
 tag:
   - Tier2
 tier: 2
