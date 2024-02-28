@@ -18,6 +18,9 @@ adjust+:
   - enabled: false
     when: distro < rhel-8.4
     continue: false
+  - when: arch == ppc64le
+    enabled: false
+    because: Valgrind functionality missing on ppc64le
 link:
   - verifies: https://issues.redhat.com/browse/RHEL-519
   - verifies: https://issues.redhat.com/browse/RHEL-430
