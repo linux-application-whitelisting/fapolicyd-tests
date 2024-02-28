@@ -49,7 +49,7 @@ destructiveSetup() {
   if ! virsh list --all | grep -q "$destructiveVMName"; then
     while :; do
       vmRepos=$(vmGetCurrentRepos)
-      base=$(echo "$vmRepos" | grep '1$' | grep -im1 'baseos')
+      base=$(echo "$vmRepos" | grep '1$' | grep -iv 'debug' | grep -im1 'baseos')
       others=$(echo "$vmRepos" | grep -vF "$base" | grep -vF "beaker.engineering" )
       vmRepos="$base"$'\n'"$others"
       vmPrepareKs $destructiveVMName || { let res++; break; }
