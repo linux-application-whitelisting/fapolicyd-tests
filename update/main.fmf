@@ -6,7 +6,6 @@ require+:
   - library(distribution/tcf)
   - library(vm/common)
 recommend:
-  - library(vm/RHEL)
 tag:
   - Tier2
 tier: 2

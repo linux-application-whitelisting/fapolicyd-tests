@@ -14,6 +14,5 @@ require+:
   - name: /destructive/library
     url: https://github.com/RedHat-SP-Security/fapolicyd-tests
     type: library
-    #path: ../tests
   - library(ControlFlow/Cleanup)
   - library(ControlFlow/SessionControl)

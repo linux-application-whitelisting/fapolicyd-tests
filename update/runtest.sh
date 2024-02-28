@@ -32,7 +32,7 @@
 rlJournalStart
     rlPhaseStartSetup
         rlRun "rlImport --all" || rlDie 'cannot continue'
-        rlRun "rlImport vm/RHEL" 0-255
+        rlRun "rlImport tests/vm/RHEL" || rlDie 'cannot continue'
         rlRun "rlCheckMakefileRequires" || rlDie 'cannot continue'
         rlRun "TmpDir=\$(mktemp -d)" 0 "Creating tmp directory"
         CleanupRegister "rlRun 'rm -r $TmpDir' 0 'Removing tmp directory'"
