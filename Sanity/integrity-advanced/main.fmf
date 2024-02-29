@@ -19,5 +19,6 @@ extra-summary: /CoreOS/fapolicyd/Sanity/integrity
 extra-task: /CoreOS/fapolicyd/Sanity/integrity
 extra-nitrate: TC#0609439
 adjust+:
-  - enabled: false
-    when: distro < rhel-8.4
+  - when: distro == rhel-8 or distro = centos-stream-8
+    enabled: false
+    because: RHEL-8 has old kernel and IMA setup is disabled
