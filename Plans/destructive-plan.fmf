@@ -4,12 +4,12 @@ context:
 discover:
   - how: fmf
     test:
-      - /fapolicyd/destructive/library
+      - /destructive/library
   - how: fmf
     test:
-      - /fapolicyd/destructive/.*
+      - /destructive/.*
     exclude:
-      - /fapolicyd/destructive/library
+      - /destructive/library
 provision:
   - how: minute
     flavor: ci.nested.virt.m1.large
@@ -21,5 +21,13 @@ provision:
             is-supported: true
         disk:
             size: '>= 40 GB'
+
+adjust+:
+  - when: distro == rhel-9 or distro == centos-stream-9
+    prepare+:
+      - how: shell
+        script:
+          - dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm https://dl.fedoraproject.org/pub/epel/epel-next-release-latest-9.noarch.rpm
+
 execute:
     how: tmt
