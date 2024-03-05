@@ -18,6 +18,9 @@ adjust+:
   - enabled: false
     when: distro < rhel-8.8 or distro ~< rhel-9.2
     continue: false
+  - when: arch != x86_64
+    enabled: false
+    because: unstable on different archs
 link:
   - verifies: https://bugzilla.redhat.com/show_bug.cgi?id=2087040
 extra-nitrate: TC#0614719
