@@ -62,15 +62,21 @@ destructiveSetup() {
       sessionSend "root$CR" || { let res++; break; }
       sessionExpect -nocase "password" || { let res++; break; }
       sessionSend "redhat$CR" || { let res++; break; }
+      sessionRun 'yum install -y /usr/bin/debuginfo-install' || { let res++; break; }
       sessionRun 'yum install -y fapolicyd' || { let res++; break; }
-      sessionSend "shutdown now$CR" || { let res++; break; }
-      sessionSend "$CR" || { let res++; break; }
-      sessionWaitAPrompt || { let res++; break; }
-      for (( i=0; i<120; i++)); do
-        virsh domstate $destructiveVMName | grep -q "shut off" && break
-        sleep 1
-      done
-      vmDestroy $destructiveVMName
+      sessionRun 'yum install -y systemtap' || { let res++; break; }
+      sessionRun --timeout 900 'stap-prep' || { let res++; break; }
+      sessionRun --timeout 600 'yum install --enablerepo "*debuginfo" -y fapolicyd-debuginfo' || { let res++; break; }
+      sessionRun --timeout 600 'debuginfo-install -y $(rpm -q fapolicyd)' || { let res++; break; }
+      # sessionSend "shutdown now$CR" || { let res++; break; }
+      # sessionSend "$CR" || { let res++; break; }
+      # sessionWaitAPrompt || { let res++; break; }
+      # for (( i=0; i<120; i++)); do
+      #   virsh list --state-shutoff | grep -q $destructiveVMName && break
+      #   sleep 1
+      # done
+      # vmDestroy $destructiveVMName
+      sessionRun --timeout 300 'sync' || { let res++; break; }
       vmSnapshotCreate "$destructiveVMName" "snapshot0" || { let res++; break; }
       break
     done
@@ -78,13 +84,22 @@ destructiveSetup() {
   while :; do
     vmDestroy $destructiveVMName
     vmSnapshotRevert $destructiveVMName snapshot0 || { let res++; break; }
-    vmStart $destructiveVMName || { let res++; break; }
-    sessionRun true || { let res++; break; }
-    sessionSend "virsh console $destructiveVMName --force$CR" || { let res++; break; }
-    sessionExpect -nocase "login:" || { let res++; break; }
-    sessionSend "root$CR" || { let res++; break; }
-    sessionExpect -nocase "password" || { let res++; break; }
-    sessionSend "redhat$CR" || { let res++; break; }
+    if virsh list --state-shutoff | grep -q $destructiveVMName; then
+      vmStart $destructiveVMName || { let res++; break; }
+      sessionRun true || { let res++; break; }
+      sessionSend "virsh console $destructiveVMName --force$CR" || { let res++; break; }
+      sessionExpect -nocase "login:" || { let res++; break; }
+      sessionSend "root$CR" || { let res++; break; }
+      sessionExpect -nocase "password" || { let res++; break; }
+      sessionSend "redhat$CR" || { let res++; break; }
+    else
+      sessionSend "virsh console $destructiveVMName --force$CR" || { let res++; break; }
+      for (( i=0; i<120; i++ )); do
+        sessionSend "$CR"
+        sessionWaitAPrompt --timeout 1 && break
+        sleep 1
+      done
+    fi
     sessionRun true || { let res++; break; }
     break
   done
