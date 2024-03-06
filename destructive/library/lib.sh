@@ -97,7 +97,6 @@ destructiveSetup() {
       for (( i=0; i<120; i++ )); do
         sessionSend "$CR"
         sessionWaitAPrompt --timeout 1 && break
-        sleep 1
       done
     fi
     sessionRun true || { let res++; break; }
