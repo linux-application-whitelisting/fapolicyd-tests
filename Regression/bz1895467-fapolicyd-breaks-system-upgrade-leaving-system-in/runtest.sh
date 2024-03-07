@@ -86,7 +86,13 @@ EOF
   rlPhaseStartTest "system instalability" && {
     YUM=`which yum` || YUM=`which dnf`
     rlRun "mkdir installroot"
-    rlRun "$YUM -y --nogpgcheck --setopt=skip_if_unavailable=1 --installroot=$PWD/installroot install fapolicyd"
+    RELEASEVER=$(rpm -E %fedora || rpm -E %rhel)
+    # Run the yum command with the dynamically determined release version
+    if rlIsFedora '>40' ; then
+      rlRun "$YUM -y --nogpgcheck --setopt=skip_if_unavailable=1 --use-host-config --releasever=$RELEASEVER --installroot=$PWD/installroot install fapolicyd"
+    else
+      rlRun "$YUM -y --nogpgcheck --setopt=skip_if_unavailable=1 --installroot=$PWD/installroot install fapolicyd"
+    fi
   rlPhaseEnd; }
 
   rlPhaseStartCleanup && {

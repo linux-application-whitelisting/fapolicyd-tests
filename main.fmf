@@ -3,6 +3,7 @@ component:
 require:
   - name: /Library/common
     url: https://github.com/RedHat-SP-Security/fapolicyd-tests
+    ref: master
     type: library
   - fapolicyd
 recommend:
