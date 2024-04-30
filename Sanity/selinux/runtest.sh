@@ -75,8 +75,13 @@ rlJournalStart && {
       rlSEMatchPathCon "/var/log/fapolicyd-access.log" "fapolicyd_log_t"
       rlSEMatchPathCon "/var/lib/fapolicyd" "fapolicyd_var_lib_t"
       rlSEMatchPathCon "/var/lib/fapolicyd/data.mdb" "fapolicyd_var_lib_t"
-      rlSEMatchPathCon "/var/run/fapolicyd/fapolicyd.fifo" "fapolicyd_var_run_t"
-      rlSEMatchPathCon "/var/run/fapolicyd.pid" "fapolicyd_var_run_t"
+      if rlIsRHEL "<10" || rlIsFedora "<40"; then
+           rlSEMatchPathCon "/var/run/fapolicyd/fapolicyd.fifo" "fapolicyd_var_run_t"
+           rlSEMatchPathCon "/var/run/fapolicyd.pid" "fapolicyd_var_run_t"
+      else
+           rlSEMatchPathCon "/var/run/fapolicyd/fapolicyd.fifo" "fapolicyd_run_t"
+           rlSEMatchPathCon "/var/run/fapolicyd.pid" "fapolicyd_run_t"
+      fi
     rlPhaseEnd; }
 
     rlPhaseStartTest "policy rules" && {
