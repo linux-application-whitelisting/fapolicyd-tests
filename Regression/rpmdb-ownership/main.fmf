@@ -12,6 +12,9 @@ tier: '3'
 adjust+:
   - enabled: false
     when: distro < rhel-8.2
+adjust:
+    enabled: false
+    when: initiator == packit and distro == centos-stream-8
 link:
     verifies: https://issues.redhat.com/browse/RHEL-829
 extra-nitrate: TC#0615601
