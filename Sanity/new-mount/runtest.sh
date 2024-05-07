@@ -34,7 +34,7 @@ rlJournalStart
         rlRun "rlImport --all" || rlDie 'cannot continue'
         rlRun "rlCheckMakefileRequires" || rlDie 'cannot continue'
         rlRun "rlFileBackup /usr/local/bin/"
-        rlRun "rlFileBackup /mnt/test_mount_point/"
+        rlRun "rlFileBackup --clean /mnt/test_mount_point/"
         rlRun "TmpDir=\$(mktemp -d)" 0 "Creating tmp directory"
         CleanupRegister "rlRun 'rm -r $TmpDir' 0 'Removing tmp directory'"
         CleanupRegister 'rlRun "popd"'
