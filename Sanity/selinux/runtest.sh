@@ -79,8 +79,8 @@ rlJournalStart && {
            rlSEMatchPathCon "/var/run/fapolicyd/fapolicyd.fifo" "fapolicyd_var_run_t"
            rlSEMatchPathCon "/var/run/fapolicyd.pid" "fapolicyd_var_run_t"
       else
-           rlSEMatchPathCon "/var/run/fapolicyd/fapolicyd.fifo" "fapolicyd_run_t"
-           rlSEMatchPathCon "/var/run/fapolicyd.pid" "fapolicyd_run_t"
+           rlSEMatchPathCon "/run/fapolicyd/fapolicyd.fifo" "fapolicyd_var_run_t"
+           rlSEMatchPathCon "/run/fapolicyd.pid" "fapolicyd_var_run_t"
       fi
     rlPhaseEnd; }
 
