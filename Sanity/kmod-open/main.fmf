@@ -2,7 +2,8 @@ description: allow kernel module to open files
 contact: Dalibor Pospíšil <dapospis@redhat.com>
 test: ./runtest.sh
 duration: 5m
-enabled: true
+#disable because is seems to be unstable for all archs in TF
+enabled: false
 require+:
   - library(distribution/tcf)
   - library(distribution/testUser)

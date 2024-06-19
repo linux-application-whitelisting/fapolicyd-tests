@@ -25,7 +25,7 @@ rlJournalStart
     	rlRun "touch $COOKIE"
     rlPhaseEnd
 
-    rhts-reboot
+    tmt-reboot
 
   else
     rlPhaseStartTest "post-reboot IMA test"
