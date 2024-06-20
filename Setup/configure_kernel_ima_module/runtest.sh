@@ -22,10 +22,12 @@ rlJournalStart
         rlAssertGrep "ima_policy=${IMA_POLICY}" $rlRun_LOG
 	rlAssertGrep "ima_audit=${IMA_AUDIT}" $rlRun_LOG
 	rlAssertGrep "ima_hash=${IMA_HASH}" $rlRun_LOG
-    	rlRun "touch $COOKIE"
+        # on s390x run zipl to make change done through grubby effective
+        [ "$(rlGetPrimaryArch)" == "s390x" ] && rlRun "zipl -V"
+	rlRun "touch $COOKIE"
     rlPhaseEnd
 
-    tmt-reboot
+    rhts-reboot
 
   else
     rlPhaseStartTest "post-reboot IMA test"
