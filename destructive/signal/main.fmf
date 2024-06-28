@@ -2,39 +2,88 @@ description: test the service stability on a signal
 contact: Dalibor Pospíšil <dapospis@redhat.com>
 require+:
   - library(distribution/Log)
-duration: 5m
 test: ./runtest.sh
-link:
-  - verifies: https://issues.redhat.com/browse/RHEL-15498
+duration: 15m
+/external:
+    link:
+      - verifies: https://issues.redhat.com/browse/RHEL-15498
 
-/ABRT:
-/ALRM:
-/BUS:
-/CHLD:
-/CONT:
-/FPE:
-/HUP:
-/ILL:
-/INT:
-/IO:
-/KILL:
-/PIPE:
-/PROF:
-/PWR:
-/QUIT:
-/SEGV:
-/STKFLT:
-/STOP:
-/TSTP:
-/SYS:
-/TERM:
-/TRAP:
-/TTIN:
-/TTOU:
-/URG:
-/USR1:
-/USR2:
-/VTALRM:
-/XCPU:
-/XFSZ:
-/WINCH:
+    /ALRM:
+    /BUS:
+    /CHLD:
+    /CONT:
+    /FPE:
+    /HUP:
+    /ILL:
+    /IO:
+    /KILL:
+    /PIPE:
+    /PROF:
+    /PWR:
+    /SEGV:
+    /STKFLT:
+    /TSTP:
+    /SYS:
+    /TRAP:
+    /TTIN:
+    /TTOU:
+    /URG:
+    /USR1:
+    /USR2:
+    /VTALRM:
+    /XCPU:
+    /XFSZ:
+    /WINCH:
+
+/external-hardened:
+    adjust+:
+      - when: distro < rhel-9.5
+        enabled: false
+        continue: false
+    /STOP:
+
+/external-unblockable:
+    enabled: false
+    /ABRT:
+    /INT:
+    /QUIT:
+    /TERM:
+
+/internal:
+    /ABRT:
+    /ALRM:
+    /BUS:
+    /CHLD:
+    /CONT:
+    /FPE:
+    /HUP:
+    /ILL:
+    /INT:
+    /IO:
+    /KILL:
+    /PIPE:
+    /PROF:
+    /PWR:
+    /QUIT:
+    /SEGV:
+    /STKFLT:
+    /TSTP:
+    /SYS:
+    /TERM:
+    /TRAP:
+    /TTIN:
+    /TTOU:
+    /URG:
+    /USR1:
+    /USR2:
+    /VTALRM:
+    /XCPU:
+    /XFSZ:
+    /WINCH:
+
+/internal-hardened:
+    adjust+:
+      - enabled: false
+        when: distro < rhel-9.5
+        continue: false
+    /STOP:

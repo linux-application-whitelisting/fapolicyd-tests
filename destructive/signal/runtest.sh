@@ -50,23 +50,32 @@ rlJournalStart
   rlPhaseStartSetup "prepare a VM"
     CleanupRegister 'rlRun "destructiveCleanup"'
     rlRun "destructiveSetup" || rlDie "could not prepare the testing VM"
+    [[ "$TMT_TEST_NAME" =~ hardened ]] && rlRun "sessionRun 'setsebool fapolicyd_hardening_optional on'"
   rlPhaseEnd
 
-  sessionRunTIMEOUT=30
-  sessionExpectTIMEOUT=300
+  sessionRunTIMEOUT=10
   CR=$'\r'
 
+  SIGNAL="SEGV"
   [[ -n "$TMT_TEST_NAME" ]] && SIGNAL=${TMT_TEST_NAME##*/}
 
-  SIGNAL=${SIGNAL:-SEGV}
+  INTEXT="internal"
+  [[ "$TMT_TEST_NAME" =~ external ]] && INTEXT="external"
 
   rlPhaseStartTest "send signal $SIGNAL" && {
     while :; do
 
       rlRun "sessionRun 'systemctl restart fapolicyd'"
       LogSleepWithProgress 5
-      rlRun "sessionRun 'systemctl kill --signal $SIGNAL fapolicyd'"
-      rlRun "sessionRun 'id'" || break
+      if [[ "$INTEXT" == "internal" ]]; then
+        rlRun "sessionRun --timeout 300 'stap-prep'"
+        rlRun "sessionRun 'stap -v -g -d /usr/sbin/fapolicyd --ldd -e '\''probe process(\"/usr/sbin/fapolicyd\").function(\"rpm_load_list@library/rpm-backend.c\") { if (tid() == pid()) next; printf(\"%ld (%s): sending SIG${SIGNAL}\\n\", tid(), execname()); raise(%{SIG${SIGNAL}%}) }'\'' 2>&1 | tee stap.out &'"
+        rlRun "sessionRun --timeout 180 'for (( i=0; i<180; i++)); do sleep 1; grep -q \"Pass 5\" stap.out && break; done'"
+        rlRun "sessionRun --timeout 8 'fapolicyd-cli --update; sleep 3'"
+      else
+        rlRun "sessionRun --timeout 5 'systemctl kill --signal $SIGNAL fapolicyd'"
+      fi
+      rlRun "sessionRun --timeout 5 'id'" || break
 
       rlRun "sessionRun 'systemctl -l --no-pager status fapolicyd'"
 
