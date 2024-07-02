@@ -48,8 +48,23 @@ destructiveSetup() {
   CR=$'\r'
   if ! virsh list --all | grep -q "$destructiveVMName"; then
     while :; do
+      # enable repository in case of run test in TF, to have available correct repository
       vmRepos=$(vmGetCurrentRepos)
-      base=$(echo "$vmRepos" | grep '1$' | grep -iv 'debug' | grep -im1 'baseos')
+      echo $vmRepos
+      yumRepos="/etc/yum.repos.d/"
+      for repos in "$yumRepos"/*; do
+          arch=$(uname -m)
+          if  grep -qi '\[.*rhel.*\]' "$repos"; then
+              base=$(grep -i "compose.*baseos.*${arch}.*oes" "$repos" | sed 's/baseurl=//')
+          fi
+          if  grep -qi '\[fedora\]' "$repos"; then
+              base=$(grep -i "fedora-\$releasever\&arch=\$basearch" "$repos" | sed 's/metalink=//')
+          fi
+      done
+      if [ -z "$base" ]; then
+          base=$(echo "$vmRepos" | grep '1$' | grep -iv 'debug' | grep -im1 'baseos')
+      fi
+      echo $base
       others=$(echo "$vmRepos" | grep -vF "$base" | grep -vF "beaker.engineering" )
       vmRepos="$base"$'\n'"$others"
       vmPrepareKs $destructiveVMName || { let res++; break; }
