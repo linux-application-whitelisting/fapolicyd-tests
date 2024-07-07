@@ -13,7 +13,7 @@ discover:
 provision:
   - how: minute
     flavor: ci.nested.virt.m1.large
-    image: fedora
+    image: rhel-9.5
     hardware:
         arch: x86_64
         memory: '>= 4 GB'
