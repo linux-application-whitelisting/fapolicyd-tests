@@ -61,6 +61,15 @@ rlJournalStart && {
     rlPhaseEnd; }
     rlPhaseStartTest "check ipa-server-install" && {
       CleanupRegister --mark 'rlRun "fapCleanup"'
+      if rlIsRHELLike '>=10'; then
+      #https://access.redhat.com/solutions/5567781
+        rlRun "cat <<EOF > /etc/fapolicyd/rules.d/33-tomcat.rules
+allow perm=open dir=/usr/lib/jvm/ : path=/usr/share/pki/server/webapps/ROOT/index.jsp
+allow perm=open dir=/usr/lib/jvm/ : all ftype=application/javascript trust=0
+EOF"
+      #https://access.redhat.com/solutions/3400091
+        rlRun "umask 0022"
+      fi
       rlRun "fapSetup"
       CleanupRegister 'rlRun "fapStop"'
       rlRun "fapStart" > /dev/null
@@ -71,6 +80,9 @@ rlJournalStart && {
       IPA_MACHINE_HOSTNAME="${h[0]}"
       DOMAIN_NAME=`hostname -d`
       DOMAIN_NAME="$(echo "${h[0]}" | sed 's/^[^.]*\.//')"
+      if rlIsRHELLike '>=10'; then
+        DOMAIN_NAME="domain.com"
+      fi
       REALM_NAME="TESTREALM.COM"
       DM_PASSWORD="Secret123"
       MASTER_PASSWORD="Secret123"
