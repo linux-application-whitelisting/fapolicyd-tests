@@ -89,6 +89,13 @@ EOF
         fapolicyd-dnf-plugin-${V_old}-${R_old}.noarch
       )
     }
+    rlIsRHEL '>=10' || rlIsRHELLike '>=10' && {
+      V_old=1.3.2
+      R_old=4.el10
+      packages+=(
+        fapolicyd-dnf-plugin-${V_old}-${R_old}.noarch
+      )
+    }
     packages+=(
       fapolicyd-${V_old}-${R_old}.$A
       #fapolicyd-debuginfo-${V_old}-${R_old}.$A
