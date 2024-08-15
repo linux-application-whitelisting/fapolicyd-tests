@@ -8,12 +8,12 @@ require+:
   - library(distribution/testUser)
   - fapolicyd
   - file
-recommend:
   - ipa-server
 duration: 60m
 enabled: true
 tag:
   - Tier2
+  - rhel-buildroot
 tier: '2'
 adjust+:
   - enabled: false
