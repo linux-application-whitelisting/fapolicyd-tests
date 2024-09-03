@@ -143,6 +143,7 @@ fapStart() {
           FAPOPTS="$(echo "$FAPOPTS" | sed -r 's/--debug[^ ]*//g')"
       }
       [[ "$1" == "--no-debug" ]] && {
+        DEBUG_MODE="False"
         shift
         continue
       }
@@ -188,20 +189,24 @@ EOF
   rm -f /run/fapolicyd/fapolicyd.fifo
   fapResetServiceOutTimestamp
   rlServiceStart fapolicyd || let res++
-
   fapServiceOut -b -f
   tail_pid=$!
-
   local t=$(($(date +%s) + $Timeout))
-  while ! fapServiceOut | grep -q 'Starting to listen for events' \
-        && systemctl status fapolicyd > /dev/null; do
-    sleep 1
-    echo -n . >&2
-    [[ $(date +%s) -gt $t ]] && {
-      let res++
-      break
-    }
-  done
+  #if VAR empty, DEBUG could be set, otherwise while not grep without fapolicyd in debug mode
+  if [ -z "$DEBUG_MODE" ]; then
+    while ! fapServiceOut | grep -q 'Starting to listen for events' \
+          && systemctl status fapolicyd > /dev/null; do
+      sleep 1
+      echo -n . >&2
+        [[ $(date +%s) -gt $t ]] && {
+          let res++
+          break
+        }
+    done
+  else
+    #unset previous set VAR in function
+    unset DEBUG_MODE
+  fi
   disown $tail_pid
   kill $tail_pid
   echo
