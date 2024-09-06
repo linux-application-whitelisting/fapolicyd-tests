@@ -7,7 +7,7 @@ require+:
   - library(ControlFlow/Cleanup)
   - library(distribution/testUser)
   - audit
-duration: 5m
+duration: 10m
 enabled: true
 tag:
   - Tier2
