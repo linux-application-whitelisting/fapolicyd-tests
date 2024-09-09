@@ -194,6 +194,7 @@ EOF
   local t=$(($(date +%s) + $Timeout))
   #if VAR empty, DEBUG could be set, otherwise while not grep without fapolicyd in debug mode
   if [ -z "$DEBUG_MODE" ]; then
+    sleep 3
     while ! fapServiceOut | grep -q 'Starting to listen for events' \
           && systemctl status fapolicyd > /dev/null; do
       sleep 1
