@@ -7,9 +7,10 @@ require+:
   - library(distribution/tcf)
   - library(ControlFlow/Cleanup)
   - library(rpm/snapshot)
-  - rpmbuild
   - createrepo_c
   - /usr/bin/yum-builddep
+recommend:
+  - rpmbuild
 tag:
   - Tier1
   - rhel-8.6.0
