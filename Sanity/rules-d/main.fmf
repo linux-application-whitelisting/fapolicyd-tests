@@ -7,8 +7,8 @@ require+:
   - library(distribution/tcf)
   - library(ControlFlow/Cleanup)
   - library(rpm/snapshot)
-  - /usr/bin/rpmbuild
-  - /usr/bin/createrepo
+  - rpmbuild
+  - createrepo_c
   - /usr/bin/yum-builddep
 tag:
   - Tier1

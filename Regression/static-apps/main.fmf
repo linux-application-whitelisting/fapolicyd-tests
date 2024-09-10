@@ -6,7 +6,7 @@ require+:
   - library(ControlFlow/Cleanup)
   - library(distribution/testUser)
   - /usr/bin/readelf
-  - /usr/bin/gcc
+  - gcc
   - glibc-static
 duration: 5m
 enabled: true

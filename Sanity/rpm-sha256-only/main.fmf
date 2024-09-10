@@ -3,7 +3,7 @@ contact: Dalibor Pospíšil <dapospis@redhat.com>
 test: ./runtest.sh
 require+:
   - library(ControlFlow/Cleanup)
-  - /usr/bin/rpmbuild
+  - rpmbuild
 duration: 5m
 enabled: true
 tag:
