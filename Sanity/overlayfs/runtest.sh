@@ -90,7 +90,9 @@ rlJournalStart && {
       fapSetConfigOption 'allow_filesystem_mark' '1'
       rlRun "fapServiceStart"
       rlRun "rlServiceStatus fapolicyd"
+      sleep 5
       rlRun -s "systemd-run --pipe -p DynamicUser=yes bash -c 'id ; id2'" 126
+      sleep 5
       rlAssertGrep "/usr/bin/id2: Operation not permitted" $rlRun_LOG -iq
     rlPhaseEnd; }
   tcfFin; }
