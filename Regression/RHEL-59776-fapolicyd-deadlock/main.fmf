@@ -1,0 +1,25 @@
+summary: Fapolicyd could deadlock system during updating trustdb
+description: |
+  When the daemon is reloading the trustdb, and the rpmdb file is concurrently 
+  processed as an object, the file descriptor is closed at the end of evaluation.
+  A close() on the SQLite database file causes the locks to be dropped. 
+  As a result, subsequent RPM installations can corrupt the RPM database when 
+  fapolicyd is running.
+contact: Patrik Koncity <dpkoncity@redhat.com>
+test: ./runtest.sh
+require+:
+  - library(ControlFlow/Cleanup)
+  - library(distribution/testUser)
+duration: 10m
+enabled: true
+tag:
+  - Tier3
+tier: 3
+adjust+:
+  - enabled: false
+    when: distro < rhel-9.0
+    continue: false
+link:
+  - verifies: https://issues.redhat.com/browse/RHEL-15498
+  - verifies: https://issues.redhat.com/browse/RHEL-24345
+  - verifies: https://issues.redhat.com/browse/RHEL-63090
