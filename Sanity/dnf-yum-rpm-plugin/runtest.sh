@@ -49,7 +49,7 @@ rlJournalStart
 
 
   for comm in dnf yum; do
-    which $comm > /dev/null 2>&1 && rlPhaseStartTest "$comm" && {
+    which $comm > /dev/null 2>&1 && rlPhaseStartTest "Packages maintainer: $comm" && {
       CleanupRegister --mark "rlRun '$comm remove -y fapTestPackage'"
       rlRun "fapStop"
       rlRun "fapolicyd-cli -D | grep $fapTestProgram" 1-255
