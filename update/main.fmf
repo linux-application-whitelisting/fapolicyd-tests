@@ -7,9 +7,6 @@ require+:
   - library(vm/common)
 recommend:
   - library(vm/RHEL)
-tag:
-  - Tier2
-tier: 2
 duration: 3h
 enabled: false
 adjust+:
