@@ -47,7 +47,7 @@ rlJournalStart && {
   tcfTry "Tests" --no-assert && {
     #  4. fapolicyd-cli -f --trust-file DB handles items in the specified DB file in trust.d
     #  5. fapolicyd uses the trustDB items from all the files located in the trust.d and fapolicyd.trust at the same time
-    rlPhaseStartTest "--trust-file parameter" && {
+    rlPhaseStartTest "Use --trust-file parameter" && {
       CleanupRegister --mark 'rlRun "fapStop"'
       rlRun "fapStart"
       CleanupRegister 'rlRun "fapolicyd-cli -f delete ./test_file1 --trust-file trust_file1" 0-255'
