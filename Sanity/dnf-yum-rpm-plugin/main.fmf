@@ -12,6 +12,8 @@ require+:
   - /usr/bin/time
 duration: 25m
 enabled: true
+component:
+  - rpm
 tag:
   - Tier1
   - rhel-8.4.0
