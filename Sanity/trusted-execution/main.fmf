@@ -10,6 +10,7 @@ enabled: true
 tag:
   - Tier2
   - CI-Tier-1
+  - ImageMode
 tier: 2
 adjust+:
   - enabled: false

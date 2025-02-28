@@ -16,6 +16,7 @@ tag:
   - rhel-8.6.0
   - rhel-9.0.0
   - rhel-buildroot
+  - ImageMode
 tier: '1'
 adjust+:
   - enabled: false

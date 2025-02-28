@@ -23,6 +23,7 @@ tag:
 - TIPpass
 - Tier1
 - rhel-8.3.0
+- ImageMode
 tier: '1'
 adjust+:
 -   enabled: false
