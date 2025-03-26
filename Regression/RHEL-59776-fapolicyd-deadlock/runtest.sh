@@ -3,7 +3,14 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 #   runtest.sh of /fapolicyd-tests/Regression/RHEL-59776-fapolicyd-deadlock
-#   Description: The evaluator will configure fapolicyd to allow execution of executable based on path, hash and directory. The evaluator will then attempt to execute executables. The evaluator will ensure that the executables that are allowed to run has been executed and the executables that are not allowed to run will be denied.
+#   Description: The evaluator will configure fapolicyd to allow execution
+#                 of executable based on path, hash and directory.
+#                 The evaluator will then attempt to execute executables.
+#                 The evaluator will ensure that the executables
+#                 that are allowed to run has been executed and the executables
+#                 that are not allowed to run will be denied.
+#                 Test also covers verification of rpm-locking mechanism for
+#                 database during fapolicyd update.
 #   Author: Patrik Koncity <dpkoncity@redhat.com>
 #
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -29,12 +36,45 @@
 . /usr/share/beakerlib/beakerlib.sh || exit 1
 PACKAGE="fapolicyd"
 
+
 rlJournalStart && {
   rlPhaseStartSetup && {
     rlRun "rlImport --all" 0 "Import libraries" || rlDie "cannot continue"
-    CleanupRegister 'fapCleanup'
-    fapPrepareTestPackages
+    rlRun 'TmpDir=$(mktemp -d)' 0 'Creating tmp directory'
+    CleanupRegister "rlRun 'rm -r $TmpDir' 0 'Removing tmp directory'"
+    CleanupRegister 'rlRun "popd"'
+    rlRun "pushd $TmpDir"
+    CleanupRegister 'rlRun "rm -rf /root/rpmbuild"'
     CleanupRegister 'rlRun "rpm -e fapTestPackage"'
+    fapPrepareTestPackages
+    CleanupRegister 'rlRun "fapCleanup"'
+    rlRun "fapSetup"
+    CleanupRegister 'rlRun "fapStop"'
+    rlRun "fapStart"
+  rlPhaseEnd; }
+
+  rlPhaseStartTest "Verify rpm locking mechanism during update" && {
+    CleanupRegister --mark 'rlRun "rm -rf ~/rpmbuild"'
+
+    fapPrepareTestPackageContent
+    rlRun "sed -i -r 's/(Version:).*/\1 3/' ~/rpmbuild/SPECS/fapTestPackage.spec"
+    rlRun "sed -i -r 's/fapTestProgram/\03/' ~/rpmbuild/SOURCES/fapTestProgram.c"
+    rlRun "sed -i -r 's/#scriptlet/%post\necho \"wait 10s\"; sleep 10; echo \"done\"/' ~/rpmbuild/SPECS/fapTestPackage.spec"
+    rlRun "rpmbuild -ba ~/rpmbuild/SPECS/fapTestPackage.spec"
+    pkg=$(ls -1 ~/rpmbuild/RPMS/*/fapTestPackage-*)
+
+    CleanupRegister "rlRun 'rpm -evh fapTestPackage'"
+    rlRun "yum install -y $pkg 1>/dev/null  &"
+    rlRun "sleep 1" 0 "Wait for installation to commence."
+    rlRun "fapolicyd-cli --update"
+    rlRun "sleep 10" 0 "Wait for installation to finish"
+
+    journalctl -b -u fapolicyd | tail -n 10
+
+    rlRun -s "fapServiceOut"
+    rlAssertGrep "Could not acquire lock for rpmdb, staying with old db" $rlRun_LOG
+
+    CleanupDo --mark
   rlPhaseEnd; }
 
   rlPhaseStartTest "Check properly closing FD and increasing buffer" && {
