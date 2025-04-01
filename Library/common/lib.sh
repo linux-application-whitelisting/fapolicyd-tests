@@ -69,7 +69,7 @@ fapSetup() {
   rlRun "rlServiceStop fapolicyd"
   rlRun "rlFileBackup --namespace fap --clean /etc/fapolicyd/ /etc/systemd/system/fapolicyd.service.d"
   rlRun "rm -f /var/lib/fapolicyd/*"
-  rlRun "rlSEBooleanOn --namespace fap daemons_use_tty"
+  rlRun "setsebool daemons_use_tty on"
   if [[ -z "$(sesearch -A -s init_t -t unconfined_t -c fifo_file -p write)" ]]; then
     cat > mujfamodul.te <<EOF
 policy_module(mujfamodul,1.0)
@@ -98,7 +98,7 @@ fapCleanup() {
     systemctl daemon-reload
   }
   [[ -n "${fapolicyd_out[*]}" ]] && rm -f "${fapolicyd_out[@]}"
-  rlRun "rlSEBooleanRestore --namespace fap"
+  rlRun "setsebool daemons_use_tty off"
   rlRun "rlFileRestore --namespace fap"
   rlRun "rlServiceRestore fapolicyd"
 }

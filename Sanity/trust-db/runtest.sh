@@ -31,6 +31,11 @@
 . /usr/share/beakerlib/beakerlib.sh || exit 1
 
 PACKAGE="fapolicyd"
+TESTDIR_ALL="/var/testdir/subdir"
+TESTDIR="/var/testdir/"
+TESTFILE_FIRST="/var/testfile"
+TESTFILE_SECOND="/var/testdir/testfile"
+TESTFILE_THIRD="/var/testdir/subdir/testfile"
 
 Stop() {
   fapStop
@@ -67,11 +72,11 @@ rlJournalStart && {
       rlRun "rm -f /etc/fapolicyd/rules.d/*"
     }
     CleanupRegister "rlFileRestore"
-    rlRun "rlFileBackup --clean /opt/testdir/ /opt/testfile"
-    rlRun "mkdir -p '/opt/testdir/subdir'"
-    rlRun "touch /opt/testfile"
+    rlRun "rlFileBackup --clean $TESTDIR $TESTFILE_FIRST"
+    rlRun "mkdir -p '$TESTDIR_ALL'"
+    rlRun "touch $TESTFILE_FIRST"
     rlRun "echo 'allow perm=any all : all' > /etc/fapolicyd/fapolicyd.rules"
-    rlRun "fapolicyd-cli -f add /opt/testfile"
+    rlRun "fapolicyd-cli -f add $TESTFILE_FIRST"
   rlPhaseEnd; }
 
   tcfTry "Tests" --no-assert && {
@@ -158,7 +163,7 @@ rlJournalStart && {
     rlPhaseEnd; }
 
     rlPhaseStartTest "config option trust=file, while db is empty" && {
-      rlRun "fapolicyd-cli -f delete /opt/testfile"
+      rlRun "fapolicyd-cli -f delete $TESTFILE_FIRST"
       Trust 'file'
       CleanupRegister --mark 'rlRun "Stop"'
       rlRun "Start"

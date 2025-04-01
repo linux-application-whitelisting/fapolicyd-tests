@@ -28,6 +28,7 @@
 . /usr/share/beakerlib/beakerlib.sh
 
 PACKAGE="fapolicyd"
+TEST_LS=/var/tmp/ls2
 
 rlJournalStart
   rlPhaseStartSetup && {
@@ -42,8 +43,8 @@ rlJournalStart
     CleanupRegister 'rlRun "fapCleanup"'
     rlRun "fapSetup"
     CleanupRegister 'rlRun "rlFileRestore"'
-    rlRun "rlFileBackup --clean /usr/bin/ls2"
-    rlRun "cp /usr/bin/ls /usr/bin/ls2"
+    rlRun "rlFileBackup --clean $TEST_LS"
+    rlRun "cp /usr/bin/ls $TEST_LS"
     CleanupRegister "rlRun 'fapServiceRestore'"
     rlRun "fapServiceStart"
   rlPhaseEnd; }
@@ -57,13 +58,13 @@ rlJournalStart
 
   rlPhaseStartTest "direct execution" && {
     rlRun "su -c '/usr/bin/ls -la' - $testUser"
-    rlRun "su -c '/usr/bin/ls2 -la' - $testUser" 126
+    rlRun "su -c '$TEST_LS -la' - $testUser" 126
   rlPhaseEnd; }
 
   rlPhaseStartTest "ld_so execution" && {
     ld_so=`readelf -e /usr/bin/bash | grep interpreter | sed 's/.$//' | rev | cut -d " " -f 1 | rev`
     rlRun "su -c '$ld_so /usr/bin/ls -la' - $testUser" 126
-    rlRun "su -c '$ld_so /usr/bin/ls2 -la' - $testUser" 126
+    rlRun "su -c '$ld_so $TEST_LS -la' - $testUser" 126
   rlPhaseEnd; }
 
   rlPhaseStartCleanup && {
