@@ -19,6 +19,7 @@ tag:
 - TIPfail
 - Tier2
 - rhel-8.3.0
+- ImageMode
 tier: '2'
 extra-summary: /CoreOS/fapolicyd/Sanity/trust-db
 extra-task: /CoreOS/fapolicyd/Sanity/trust-db

@@ -1,7 +1,8 @@
 summary: fapolicyd test library
 contact: Dalibor Pospíšil <dapospis@redhat.com>
 require:
-- library(selinux-policy/common)
 - rpmdevtools
 - rpm-build
 - gcc
+- policycoreutils
+- selinux-policy-devel

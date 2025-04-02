@@ -45,6 +45,12 @@ Update() {
 
 workaround=${workaround:-true}
 
+TESTDIR_ALL="/var/testdir/subdir"
+TESTDIR="/var/testdir/"
+TESTFILE_FIRST="/var/testfile"
+TESTFILE_SECOND="/var/testdir/testfile"
+TESTFILE_THIRD="/var/testdir/subdir/testfile"
+
 rlJournalStart && {
   rlPhaseStartSetup && {
     rlRun "rlImport --all" 0 "Import libraries" || rlDie "cannot continue"
@@ -59,11 +65,11 @@ rlJournalStart && {
     CleanupRegister 'rlRun "Stop"'
     rlRun "Start"
     CleanupRegister "rlFileRestore"
-    rlRun "rlFileBackup --clean /opt/testdir/ /opt/testfile"
-    rlRun "mkdir -p '/opt/testdir/subdir'"
-    rlRun "touch /opt/testfile"
-    rlRun "touch /opt/testdir/testfile"
-    rlRun "touch /opt/testdir/subdir/testfile"
+    rlRun "rlFileBackup --clean $TESTDIR $TESTFILE_FIRST"
+    rlRun "mkdir -p $TESTDIR_ALL"
+    rlRun "touch $TESTFILE_FIRST"
+    rlRun "touch $TESTFILE_SECOND"
+    rlRun "touch $TESTFILE_THIRD"
   rlPhaseEnd; }
 
   tcfTry "Tests" --no-assert && {
@@ -120,39 +126,39 @@ rlJournalStart && {
       tcfChk "file" && {
         $workaround && Stop
         rlRun "fapolicyd-cli -D >db_dump"
-        rlAssertNotGrep "/opt/testfile" db_dump -E
+        rlAssertNotGrep "$TESTFILE_FIRST" db_dump -E
         $workaround && Start
-        rlRun "fapolicyd-cli -f add /opt/testfile"
+        rlRun "fapolicyd-cli -f add $TESTFILE_FIRST"
         Update
         $workaround && Stop
         rlRun "fapolicyd-cli -D >db_dump"
-        rlAssertGrep "/opt/testfile" db_dump -E
+        rlAssertGrep "$TESTFILE_FIRST" db_dump -E
         $workaround && Start
-        rlRun "fapolicyd-cli -f delete /opt/testfile"
+        rlRun "fapolicyd-cli -f delete $TESTFILE_FIRST"
         Update
         $workaround && Stop
         rlRun "fapolicyd-cli -D >db_dump"
-        rlAssertNotGrep "/opt/testfile" db_dump -E
+        rlAssertNotGrep "$TESTFILE_FIRST" db_dump -E
         $workaround && Start; :
       tcfFin; }
       tcfChk "directory" && {
         $workaround && Stop
         rlRun "fapolicyd-cli -D >db_dump"
-        rlAssertNotGrep "/opt/testdir" db_dump -E
+        rlAssertNotGrep "$TESTDIR" db_dump -E
         #debugPrompt
         $workaround && Start
-        rlRun "fapolicyd-cli -f add /opt/testdir"
+        rlRun "fapolicyd-cli -f add $TESTDIR"
         Update
         $workaround && Stop
         rlRun "fapolicyd-cli -D >db_dump"
-        rlAssertGrep "/opt/testdir/testfile" db_dump -E
-        rlAssertGrep "/opt/testdir/subdir/testfile" db_dump -E
+        rlAssertGrep "$TESTFILE_SECOND" db_dump -E
+        rlAssertGrep "$TESTFILE_THIRD" db_dump -E
         $workaround && Start
-        rlRun "fapolicyd-cli -f delete /opt/testdir"
+        rlRun "fapolicyd-cli -f delete $TESTDIR"
         Update
         $workaround && Stop
         rlRun "fapolicyd-cli -D >db_dump"
-        rlAssertNotGrep "/opt/testdir" db_dump -E
+        rlAssertNotGrep "$TESTDIR" db_dump -E
         $workaround && Start; :
       tcfFin; }
     rlPhaseEnd; }
