@@ -1,0 +1,16 @@
+summary: Test scenario with bootc upgrade and rpm ostree for package update while fapolicyd is active
+contact: Natália Bubáková <nbubakov@redhat.com>
+test: ./runtest.sh
+tag:
+  - ImageMode
+require+:
+  - fapolicyd
+  - bootc
+  - podman
+duration: 25m
+enabled: true
+
+# enabled: false
+# adjust+:
+#   - when: deploymentmode is defined and deploymentmode == image
+#     enabled: true
