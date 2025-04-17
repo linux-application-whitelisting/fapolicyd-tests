@@ -47,7 +47,7 @@ rlJournalStart
             rlRun "set -o pipefail"
         rlPhaseEnd
 
-        rlPhaseTestSetup "Pre-reboot"
+        rlPhaseStartTest "Pre-reboot"
 
             # setup fapTestPackage
             rlRun "fapPrepareTestPackages --program-dir ${TEST_DIR}/bin"
@@ -64,7 +64,6 @@ RUN dnf -y install ${fapTestPackage[0]} && dnf -y clean all
 EOF
 }
             [[ $package_manager == "rpm" ]] && {
-            # rlRun "rpm -ivh ${fapTestPackage[0]}"
             cat <<EOF > Containerfile
 FROM localhost/bootc:latest
 RUN rpm -ivh ${fapTestPackage[0]}
@@ -78,14 +77,14 @@ EOF
 
         tmt-reboot
 
-    else if [[ -e $COOKIE_1 ]]; then
+    elif [[ -e $COOKIE_1 ]]; then
         rlPhaseStartTest "Post-reboot - Verification after package installation"
 
-            # TODO: check fapolicyd is active
-            # TODO: check balicek je povoleny u fapolicyd
-
+            # verify package installation
             rlRun "fapStop"
-            rlRun "fapolicyd-cli -D | grep $fapTestProgram"
+            rlRun "systemctl is-active fapolicyd" 0 "Verify fapolicyd is active"
+            rlRun "rpm -q $fapTestProgram" 0 "Verify package is installed"
+            rlRun "fapolicyd-cli -D | grep $fapTestProgram" 0 "Verify package is trusted by fapolicyd"
             rlRun "fapStart"
 
             # update fapTestPackage
@@ -109,15 +108,14 @@ EOF
 
         tmt-reboot
 
-    else if [[ -e $COOKIE_2 ]]; then
+    elif [[ -e $COOKIE_2 ]]; then
         rlPhaseStartTest "Post-reboot - Verification after package update"
 
-            # TODO: check fapolicyd is active
-            # TODO: check balicek je povoleny u fapolicyd
-
+            # verify package update
             rlRun "fapStop"
-            rlRun "fapolicyd-cli -D | grep $fapTestProgram"
-            # rlRun "fapStart"
+            rlRun "systemctl is-active fapolicyd" 0 "Verify fapolicyd is active"
+            rlRun "rpm -q $fapTestProgram" 0 "Verify package is installed"
+            rlRun "fapolicyd-cli -D | grep $fapTestProgram" 0 "Verify package is trusted by fapolicyd"
 
             rlRun "rm -f $COOKIE_2"
         rlPhaseEnd
@@ -128,7 +126,6 @@ EOF
             rlRun "rm -rf $TEST_DIR"
             rlRun "rm -rf ~/rpmbuild"
             rlRun "fapCleanup"
-            # rlRun "fapStop"
             rlRun "rlFileRestore"
         rlPhaseEnd
     fi
