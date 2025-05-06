@@ -3,7 +3,7 @@ contact: Natália Bubáková <nbubakov@redhat.com>
 test: ./runtest.sh
 tag:
   - ImageMode
-require+:
+recommend+:
   - fapolicyd
   - bootc
   - podman

@@ -56,26 +56,26 @@ rlJournalStart
             rlRun "fapStart"
             rlRun "bootc image copy-to-storage"
 
+            fapTestPackage_0="${fapTestPackage[0]##*/}"
             # install fapTestPackage
             [[ $package_manager == "dnf" ]] && {
             # (TODO: copy test-dir to bootc image so it can be installed)
             cat <<EOF > Containerfile
 FROM localhost/bootc:latest
-COPY yum.repos.d/* /etc/yum.repos.d/
-ENV CONT_DIR=/var/fapolicyd-container-dir
-COPY /var/fapolicyd-test-dir/ $CONT_DIR/
-RUN dnf -y install ${fapTestPackage[0]} && dnf -y clean all
+COPY ${fapTestPackage_0} .
+RUN dnf -y install ${fapTestPackage_0} && dnf -y clean all
 EOF
 }
             [[ $package_manager == "rpm" ]] && {
             cat <<EOF > Containerfile
 FROM localhost/bootc:latest
-RUN rpm -ivh ${fapTestPackage[0]}
+COPY ${fapTestPackage_0} .
+RUN rpm -ivh ${fapTestPackage_0}
 EOF
 }
             rlRun "podman build -t localhost/test_package ."
             rlRun "bootc switch --transport containers-storage localhost/test_package"
-
+bash
             rlRun "touch $COOKIE_1"
         rlPhaseEnd
 
@@ -91,24 +91,25 @@ EOF
             rlRun "fapolicyd-cli -D | grep $fapTestProgram" 0 "Verify package is trusted by fapolicyd"
             rlRun "fapStart"
 
+            fapTestPackage_1="${fapTestPackage[1]##*/}"
             # update fapTestPackage
             [[ $package_manager == "dnf" ]] && {
             cat <<EOF > Containerfile
 FROM localhost/bootc:latest
-COPY yum.repos.d/* /etc/yum.repos.d/
-ENV CONT_DIR=/var/fapolicyd-container-dir
-COPY /var/fapolicyd-test-dir/ $CONT_DIR/
-RUN dnf -y install ${fapTestPackage[1]} && dnf -y clean all
+COPY ${fapTestPackage_1} .
+RUN dnf -y install ${fapTestPackage_1} && dnf -y clean all
 EOF
 }
             [[ $package_manager == "rpm" ]] && {
             cat <<EOF > Containerfile
 FROM localhost/bootc:latest
-RUN rpm -ivh ${fapTestPackage[1]}
+COPY ${fapTestPackage_1} .
+RUN rpm -ivh ${fapTestPackage_1}
 EOF
 }
             rlRun "podman build -t localhost/test_package_updated ."
             rlRun "bootc switch --transport containers-storage localhost/test_package_updated"
+bash
 
             rlRun "mv $COOKIE_1 $COOKIE_2"
         rlPhaseEnd
