@@ -41,6 +41,7 @@ rlJournalStart
 
     if [[ ! -e $COOKIE_1 && ! -e $COOKIE_2 ]]; then
         rlPhaseStartSetup
+            rlRun "rlImport --all" 0 "Import libraries" || rlDie "cannot continue"
             rlAssertRpm $PACKAGE
             rlFileBackup --clean $TEST_DIR
             rlRun "mkdir -p $TEST_DIR/{,bin}"
@@ -60,6 +61,9 @@ rlJournalStart
             # (TODO: copy test-dir to bootc image so it can be installed)
             cat <<EOF > Containerfile
 FROM localhost/bootc:latest
+COPY yum.repos.d/* /etc/yum.repos.d/
+ENV CONT_DIR=/var/fapolicyd-container-dir
+COPY /var/fapolicyd-test-dir/ $CONT_DIR/
 RUN dnf -y install ${fapTestPackage[0]} && dnf -y clean all
 EOF
 }
@@ -91,6 +95,9 @@ EOF
             [[ $package_manager == "dnf" ]] && {
             cat <<EOF > Containerfile
 FROM localhost/bootc:latest
+COPY yum.repos.d/* /etc/yum.repos.d/
+ENV CONT_DIR=/var/fapolicyd-container-dir
+COPY /var/fapolicyd-test-dir/ $CONT_DIR/
 RUN dnf -y install ${fapTestPackage[1]} && dnf -y clean all
 EOF
 }

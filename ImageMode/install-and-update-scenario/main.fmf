@@ -7,6 +7,9 @@ require+:
   - fapolicyd
   - bootc
   - podman
+  - rpmdevtools
+  - rpm-build
+  - gcc
 duration: 25m
 enabled: true
 
