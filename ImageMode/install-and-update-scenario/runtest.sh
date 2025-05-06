@@ -39,24 +39,25 @@ rlJournalStart
     # TODO: for cycle in "dnf rpm"
     package_manager=dnf
 
+    rlPhaseStartSetup
+        rlRun "rlImport --all" 0 "Import libraries" || rlDie "cannot continue"
+        rlAssertRpm $PACKAGE
+        rlRun "set -o pipefail"
+    rlPhaseEnd
+
     if [[ ! -e $COOKIE_1 && ! -e $COOKIE_2 ]]; then
-        rlPhaseStartSetup
-            rlRun "rlImport --all" 0 "Import libraries" || rlDie "cannot continue"
-            rlAssertRpm $PACKAGE
+        rlPhaseStartTest "Pre-reboot"
             rlFileBackup --clean $TEST_DIR
             rlRun "mkdir -p $TEST_DIR/{,bin}"
-            rlRun "set -o pipefail"
-        rlPhaseEnd
-
-        rlPhaseStartTest "Pre-reboot"
 
             # setup fapTestPackage
             rlRun "fapPrepareTestPackages --program-dir ${TEST_DIR}/bin"
             rlRun "fapSetup"
             rlRun "fapStart"
-            rlRun "bootc image copy-to-storage"
 
             fapTestPackage_0="${fapTestPackage[0]##*/}"
+            rlRun "bootc image copy-to-storage"
+
             # install fapTestPackage
             [[ $package_manager == "dnf" ]] && {
             # (TODO: copy test-dir to bootc image so it can be installed)
@@ -64,6 +65,7 @@ rlJournalStart
 FROM localhost/bootc:latest
 COPY ${fapTestPackage_0} .
 RUN dnf -y install ${fapTestPackage_0} && dnf -y clean all
+RUN systemctl enable fapolicyd
 EOF
 }
             [[ $package_manager == "rpm" ]] && {
@@ -82,7 +84,7 @@ bash
         tmt-reboot
 
     elif [[ -e $COOKIE_1 ]]; then
-        rlPhaseStartTest "Post-reboot - Verification after package installation"
+        rlPhaseStartTest "Post-reboot 1 - Verification after package installation"
 
             # verify package installation
             rlRun "fapStop"
@@ -92,6 +94,8 @@ bash
             rlRun "fapStart"
 
             fapTestPackage_1="${fapTestPackage[1]##*/}"
+            rlRun "bootc image copy-to-storage"
+
             # update fapTestPackage
             [[ $package_manager == "dnf" ]] && {
             cat <<EOF > Containerfile
@@ -117,7 +121,7 @@ bash
         tmt-reboot
 
     elif [[ -e $COOKIE_2 ]]; then
-        rlPhaseStartTest "Post-reboot - Verification after package update"
+        rlPhaseStartTest "Post-reboot 2 - Verification after package update"
 
             # verify package update
             rlRun "fapStop"
