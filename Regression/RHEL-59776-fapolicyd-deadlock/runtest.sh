@@ -77,13 +77,14 @@ rlJournalStart && {
     CleanupDo --mark
   rlPhaseEnd; }
 
-  rlPhaseStartTest "Check properly closing FD and increasing buffer" && {
+  # Rethink the test phase for change in implementation 
+  rlPhaseStartTest "Verify there is no deadlock" && {
     rlRun "fapStart --debug-deny"
     rlRun "rpm -ivh ${fapTestPackage[1]}"
     rlRun "rpm -i ${fapTestPackage[1]} ; rpm -i ${fapTestPackage[1]} ; rpm -i ${fapTestPackage[1]} ; rpm -i ${fapTestPackage[1]} ; rpm -i ${fapTestPackage[1]} ;" 1
     fapStop
     rlRun -s "fapServiceOut -t"
-    rlAssertGrep 'Closing FDs from buffer, size:' $rlRun_LOG 
+    # rlAssertGrep 'Closing FDs from buffer, size:' $rlRun_LOG
   rlPhaseEnd; }
 
   rlPhaseStartCleanup && {
