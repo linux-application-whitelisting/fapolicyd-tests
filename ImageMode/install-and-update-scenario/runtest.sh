@@ -31,122 +31,132 @@
 
 COOKIE_1=/var/tmp/fapolicyd-install-package-boot
 COOKIE_2=/var/tmp/fapolicyd-update-package-boot
+COOKIE_3=/var/tmp/fapolicyd-another-package-manager
 PACKAGE="fapolicyd"
 TEST_PROGRAM_DIR="/var/fapolicyd-test-dir/bin"
 
 rlJournalStart
 
-    # TODO: for cycle in "dnf rpm"
-    package_manager=dnf
+    while true; do
+        if [[ ! -e $COOKIE_3 ]]; then
+            package_manager="dnf"
+        else
+            package_manager="rpm"
+        fi
 
-    if [[ ! -e $COOKIE_1 && ! -e $COOKIE_2 ]]; then
-        rlPhaseStartSetup
-            rlRun "rlImport --all" 0 "Import libraries" || rlDie "cannot continue"
-            rlAssertRpm $PACKAGE
-            rlFileBackup --clean $TEST_PROGRAM_DIR
-            rlRun "mkdir -p $TEST_PROGRAM_DIR"
-            rlRun "set -o pipefail"
-        rlPhaseEnd
+        if [[ ! -e $COOKIE_1 && ! -e $COOKIE_2 ]]; then
+            rlPhaseStartSetup
+                rlRun "rlImport --all" 0 "Import libraries" || rlDie "cannot continue"
+                rlAssertRpm $PACKAGE
+                rlFileBackup --clean $TEST_PROGRAM_DIR
+                rlRun "mkdir -p $TEST_PROGRAM_DIR"
+                rlRun "set -o pipefail"
+            rlPhaseEnd
 
-        rlPhaseStartTest "Pre-reboot"
-            # setup fapTestPackage
-            rlRun "fapPrepareTestPackages --program-dir ${TEST_PROGRAM_DIR}"
-            rlRun "fapSetup"
-            rlRun "fapStart"
+            rlPhaseStartTest "Pre-reboot ($package_manager)"
+                # setup fapTestPackage
+                rlRun "fapPrepareTestPackages --program-dir ${TEST_PROGRAM_DIR}"
+                rlRun "fapSetup"
+                rlRun "fapStart"
 
-            fapTestPackage1=$(ls -1 | grep fap | sed -n '1p')
-            rlRun "bootc image copy-to-storage"
+                fapTestPackage1=$(ls -1 | grep fap | sed -n '1p')
+                rlRun "bootc image copy-to-storage"
 
-            # install fapTestPackage
-            [[ $package_manager == "dnf" ]] && {
-            cat <<EOF > Containerfile
+                # install fapTestPackage
+                [[ $package_manager == "dnf" ]] && install_cmd="dnf -y install ${fapTestPackage1} && dnf -y clean all"
+                [[ $package_manager == "rpm" ]] && install_cmd="rpm -ivh ${fapTestPackage1}"
+                cat <<EOF > Containerfile
 FROM localhost/bootc:latest
 COPY ${fapTestPackage1} .
-RUN dnf -y install ${fapTestPackage1} && dnf -y clean all
+RUN ${install_cmd}
 EOF
-}
-            [[ $package_manager == "rpm" ]] && {
-            cat <<EOF > Containerfile
-FROM localhost/bootc:latest
-COPY ${fapTestPackage1} .
-RUN rpm -ivh ${fapTestPackage1}
-EOF
-}
-            rlRun "cat Containerfile"
-            rlRun "podman build -t localhost/test_package ."
-            rlRun "bootc switch --transport containers-storage localhost/test_package"
 
-            rlRun "touch $COOKIE_1"
-        rlPhaseEnd
+                rlRun "cat Containerfile"
+                rlRun "podman build -t localhost/test_package ."
+                rlRun "bootc switch --transport containers-storage localhost/test_package"
 
-        tmt-reboot
+                rlRun "touch $COOKIE_1"
+            rlPhaseEnd
 
-    elif [[ -e $COOKIE_1 ]]; then
-        rlPhaseStartTest "Post-reboot 1 - Verification after package installation"
-            rlRun "rlImport --all" 0 "Import libraries" || rlDie "cannot continue"
-            rlRun "fapStart"
+            tmt-reboot
 
-            # verify package installation
-            fapTestPackage1=$(ls -1 | grep fap | sed -n '1p')
-            rlRun "systemctl is-active fapolicyd" 0 "Verify fapolicyd is active"
-            rlRun "rpm -q $fapTestPackage1" 0 "Verify package is installed"
-            rlRun "fapStop"
-            rlRun "fapolicyd-cli -D | grep fapTestProgram" 0 "Verify package is trusted by fapolicyd"
+        elif [[ -e $COOKIE_1 ]]; then
+            rlPhaseStartTest "Post-reboot 1 - Verification after package installation ($package_manager)"
+                rlRun "rlImport --all" 0 "Import libraries" || rlDie "cannot continue"
+                rlRun "fapStart"
 
-            fapTestPackage2=$(ls -1 | grep fap | sed -n '2p')
-            rlRun "bootc image copy-to-storage"
+                # verify package installation
+                fapTestPackage1=$(ls -1 | grep fap | sed -n '1p')
+                rlRun "systemctl is-active fapolicyd" 0 "Verify fapolicyd is active"
+                rlRun "rpm -q $fapTestPackage1" 0 "Verify package is installed"
+                rlRun "fapStop"
+                rlRun "fapolicyd-cli -D | grep fapTestProgram" 0 "Verify package is trusted by fapolicyd"
 
-            # update fapTestPackage
-            [[ $package_manager == "dnf" ]] && {
-            cat <<EOF > Containerfile
+                fapTestPackage2=$(ls -1 | grep fap | sed -n '2p')
+                rlRun "bootc image copy-to-storage"
+
+                # update fapTestPackage
+                [[ $package_manager == "dnf" ]] && install_cmd="dnf -y install ${fapTestPackage2} && dnf -y clean all"
+                [[ $package_manager == "rpm" ]] && install_cmd="rpm -ivh ${fapTestPackage2}"
+                cat <<EOF > Containerfile
 FROM localhost/bootc:latest
 COPY ${fapTestPackage2} .
-RUN dnf -y install ${fapTestPackage2} && dnf -y clean all
+RUN ${install_cmd}
 EOF
-}
-            [[ $package_manager == "rpm" ]] && {
-            cat <<EOF > Containerfile
+                rlRun "cat Containerfile"
+                rlRun "podman build -t localhost/test_package_updated ."
+                rlRun "bootc switch --transport containers-storage localhost/test_package_updated"
+
+                rlRun "mv $COOKIE_1 $COOKIE_2"
+            rlPhaseEnd
+
+            tmt-reboot
+
+        elif [[ -e $COOKIE_2 ]]; then
+            rlPhaseStartTest "Post-reboot 2 - Verification after package update ($package_manager)"
+                rlRun "rlImport --all" 0 "Import libraries" || rlDie "cannot continue"
+                rlRun "fapStart"
+
+                # Verify package update
+                fapTestPackage2=$(ls -1 | grep fap | sed -n '2p')
+                rlRun "systemctl is-active fapolicyd" 0 "Verify fapolicyd is active"
+                rlRun "rpm -q $fapTestPackage2" 0 "Verify package is installed"
+                rlRun "fapStop"
+                rlRun "fapolicyd-cli -D | grep fapTestProgram" 0 "Verify package is trusted by fapolicyd"
+
+                rlRun "rm -f $COOKIE_2"
+            rlPhaseEnd
+
+            rlPhaseStartCleanup
+            
+                rlRun "bootc image copy-to-storage"
+
+                # cleanup fapTestPackage
+                [[ $package_manager == "dnf" ]] && removal_cmd="dnf remove -y fapTestPackage"
+                [[ $package_manager == "rpm" ]] && removal_cmd="rpm -evh fapTestPackage"
+                cat <<EOF > Containerfile
 FROM localhost/bootc:latest
-COPY ${fapTestPackage2} .
-RUN rpm -ivh ${fapTestPackage2}
+RUN $removal_cmd
 EOF
-}
-            rlRun "cat Containerfile"
-            rlRun "podman build -t localhost/test_package_updated ."
-            rlRun "bootc switch --transport containers-storage localhost/test_package_updated"
+                rlRun "cat Containerfile"
+                rlRun "podman build -t localhost/test_package_updated ."
+                rlRun "bootc switch --transport containers-storage localhost/test_package_updated"
+                rlRun "rpm -q fapTestPackage" 1 "Verify package is removed"
+                
+                # Cleanup can be done via Containerfile if needed
+                # [[ $package_manager == "dnf" ]] && rlRun 'dnf remove -y fapTestPackage'
+                # [[ $package_manager == "rpm" ]] && rlRun 'rpm -evh fapTestPackage'
+                rlRun "rm -rf $TEST_PROGRAM_DIR"
+                rlRun "rm -rf ~/rpmbuild"
+                rlRun "fapCleanup"
+                rlRun "rlFileRestore"
+                touch $COOKIE_3
+            rlPhaseEnd
 
-            rlRun "mv $COOKIE_1 $COOKIE_2"
-        rlPhaseEnd
-
-        tmt-reboot
-
-    elif [[ -e $COOKIE_2 ]]; then
-        rlPhaseStartTest "Post-reboot 2 - Verification after package update"
-            rlRun "rlImport --all" 0 "Import libraries" || rlDie "cannot continue"
-            rlRun "fapStart"
-
-            # verify package update
-            fapTestPackage2=$(ls -1 | grep fap | sed -n '2p')
-            rlRun "systemctl is-active fapolicyd" 0 "Verify fapolicyd is active"
-            rlRun "rpm -q $fapTestPackage2" 0 "Verify package is installed"
-            rlRun "fapStop"
-            rlRun "fapolicyd-cli -D | grep fapTestProgram" 0 "Verify package is trusted by fapolicyd"
-
-            rlRun "rm -f $COOKIE_2"
-        rlPhaseEnd
-
-        rlPhaseStartCleanup
-            # TODO: remove package - error:
-            #       This bootc system is configured to be read-only. Pass --transient to perform this transaction in a transient overlay which will reset when the system reboots.
-            #       Operation aborted.
-            [[ $package_manager == "dnf" ]] && rlRun 'dnf remove -y fapTestPackage'
-            [[ $package_manager == "rpm" ]] && rlRun 'rpm -evh fapTestPackage'
-            rlRun "rm -rf $TEST_PROGRAM_DIR"
-            rlRun "rm -rf ~/rpmbuild"
-            rlRun "fapCleanup"
-            rlRun "rlFileRestore"
-        rlPhaseEnd
-    fi
+            tmt-reboot
+        fi
+        [[ $package_manager == "rpm" ]] && break
+    done
     
     rlJournalPrintText
 rlJournalEnd
