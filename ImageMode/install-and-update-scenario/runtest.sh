@@ -39,33 +39,30 @@ rlJournalStart
     # TODO: for cycle in "dnf rpm"
     package_manager=dnf
 
-    rlPhaseStartSetup
-        rlRun "rlImport --all" 0 "Import libraries" || rlDie "cannot continue"
-        rlAssertRpm $PACKAGE
-        rlRun "set -o pipefail"
-    rlPhaseEnd
-
     if [[ ! -e $COOKIE_1 && ! -e $COOKIE_2 ]]; then
-        rlPhaseStartTest "Pre-reboot"
+        rlPhaseStartSetup
+            rlRun "rlImport --all" 0 "Import libraries" || rlDie "cannot continue"
+            rlAssertRpm $PACKAGE
             rlFileBackup --clean $TEST_DIR
             rlRun "mkdir -p $TEST_DIR/{,bin}"
+            rlRun "set -o pipefail"
+        rlPhaseEnd
 
+        rlPhaseStartTest "Pre-reboot"
             # setup fapTestPackage
             rlRun "fapPrepareTestPackages --program-dir ${TEST_DIR}/bin"
             rlRun "fapSetup"
             rlRun "fapStart"
 
-            fapTestPackage_0="${fapTestPackage[0]##*/}"
+            fapTestPackage_0=$(basename ${fapTestPackage[0]})
             rlRun "bootc image copy-to-storage"
 
             # install fapTestPackage
             [[ $package_manager == "dnf" ]] && {
-            # (TODO: copy test-dir to bootc image so it can be installed)
             cat <<EOF > Containerfile
 FROM localhost/bootc:latest
 COPY ${fapTestPackage_0} .
 RUN dnf -y install ${fapTestPackage_0} && dnf -y clean all
-RUN systemctl enable fapolicyd
 EOF
 }
             [[ $package_manager == "rpm" ]] && {
@@ -75,9 +72,10 @@ COPY ${fapTestPackage_0} .
 RUN rpm -ivh ${fapTestPackage_0}
 EOF
 }
+            rlRun "cat Containerfile"
             rlRun "podman build -t localhost/test_package ."
             rlRun "bootc switch --transport containers-storage localhost/test_package"
-bash
+# bash
             rlRun "touch $COOKIE_1"
         rlPhaseEnd
 
@@ -85,15 +83,20 @@ bash
 
     elif [[ -e $COOKIE_1 ]]; then
         rlPhaseStartTest "Post-reboot 1 - Verification after package installation"
+            rlRun "rlImport --all" 0 "Import libraries" || rlDie "cannot continue"
+            rlRun "fapStart"
 
             # verify package installation
             rlRun "fapStop"
             rlRun "systemctl is-active fapolicyd" 0 "Verify fapolicyd is active"
             rlRun "rpm -q $fapTestProgram" 0 "Verify package is installed"
+            rlRun "rpm -q fapTestPackage" 0 "Verify package is installed"
+            rlRun "rpm -q $fapTestPackage_0" 0 "Verify package is installed"
+            rlAssertExists /etc/fapolicyd/fapolicyd.rules
             rlRun "fapolicyd-cli -D | grep $fapTestProgram" 0 "Verify package is trusted by fapolicyd"
             rlRun "fapStart"
 
-            fapTestPackage_1="${fapTestPackage[1]##*/}"
+            fapTestPackage_1=$(basename ${fapTestPackage[1]})
             rlRun "bootc image copy-to-storage"
 
             # update fapTestPackage
@@ -111,9 +114,10 @@ COPY ${fapTestPackage_1} .
 RUN rpm -ivh ${fapTestPackage_1}
 EOF
 }
+            rlRun "cat Containerfile"
             rlRun "podman build -t localhost/test_package_updated ."
             rlRun "bootc switch --transport containers-storage localhost/test_package_updated"
-bash
+# bash
 
             rlRun "mv $COOKIE_1 $COOKIE_2"
         rlPhaseEnd
@@ -122,6 +126,8 @@ bash
 
     elif [[ -e $COOKIE_2 ]]; then
         rlPhaseStartTest "Post-reboot 2 - Verification after package update"
+            rlRun "rlImport --all" 0 "Import libraries" || rlDie "cannot continue"
+            rlRun "fapStart"
 
             # verify package update
             rlRun "fapStop"
