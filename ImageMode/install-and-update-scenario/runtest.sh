@@ -90,7 +90,7 @@ EOF
 
             # update fapTestPackage
             [[ $PACKAGE_MANAGER == "dnf" ]] && install_cmd="dnf -y install ${fapTestPackage2} && dnf -y clean all"
-            [[ $PACKAGE_MANAGER == "rpm" ]] && install_cmd="rpm -ivh ${fapTestPackage2}"
+            [[ $PACKAGE_MANAGER == "rpm" ]] && install_cmd="rpm -Uvh ${fapTestPackage2}"
             cat <<EOF > Containerfile
 FROM localhost/bootc:latest
 COPY ${fapTestPackage2} .
@@ -121,6 +121,7 @@ EOF
         rlPhaseEnd
 
         rlPhaseStartCleanup
+            # There must be a proper cleanup via container if both package managers are run
             # [[ $PACKAGE_MANAGER == "dnf" ]] && rlRun 'dnf remove -y fapTestPackage'
             # [[ $PACKAGE_MANAGER == "rpm" ]] && rlRun 'rpm -evh fapTestPackage'
             rlRun "rm -rf $TEST_PROGRAM_DIR"
