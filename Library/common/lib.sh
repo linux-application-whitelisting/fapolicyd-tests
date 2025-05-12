@@ -277,11 +277,11 @@ This is RPM package, containing just a testing script.
 gcc -o fapTestProgram ../SOURCES/fapTestProgram.c
 
 %install
-mkdir -p %{buildroot}/usr/local/bin/
-install -m 755 fapTestProgram %{buildroot}/usr/local/bin/fapTestProgram
+mkdir -p %{buildroot}${__INTERNAL_program_dir}
+install -m 755 fapTestProgram %{buildroot}${__INTERNAL_program_dir}/fapTestProgram
 
 %files
-/usr/local/bin/fapTestProgram
+${__INTERNAL_program_dir}/fapTestProgram
 
 #scriptlet
 
@@ -291,6 +291,7 @@ EOS
 }
 
 fapPrepareTestPackages() {
+  [[ "$1" == "--program-dir" ]] && __INTERNAL_program_dir="$2" || __INTERNAL_program_dir="/usr/local/bin"
   fapPrepareTestPackageContent
   rlRun "rpmbuild -ba ~/rpmbuild/SPECS/fapTestPackage.spec"
   rlRun "sed -i -r 's/(Version:).*/\1 2/' ~/rpmbuild/SPECS/fapTestPackage.spec"
@@ -299,7 +300,7 @@ fapPrepareTestPackages() {
   rlRun "mv ~/rpmbuild/RPMS/*/fapTestPackage-* ./"
   rlRun "rm -rf ~/rpmbuild"
   fapTestPackage=( $(find $PWD | grep 'fapTestPackage-' | sort) )
-  fapTestProgram=/usr/local/bin/fapTestProgram
+  fapTestProgram=${__INTERNAL_program_dir}/fapTestProgram
 }
 
 fapSetConfigOption() {
