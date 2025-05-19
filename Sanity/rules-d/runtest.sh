@@ -371,6 +371,19 @@ EOF
       rlAssertGreater "rules are deployed into /etc/fapolicyd/rules.d" $(ls -1 /etc/fapolicyd/rules.d | wc -w) 0
     rlPhaseEnd; }
 
+    rlPhaseStartTest "custom rule pattern=normal (RHEL-30020)" && {
+      TIMESTAMP=`date "+%Y-%m-%d %H:%M:%S"`
+      rlRun "echo 'deny_audit perm=any pattern=normal : all' > /etc/fapolicyd/rules.d/28-custom.rules"
+      # rlRun -s "fapStart --debug" 1-255 #
+      # rlRun -s "systemctl stop fapolicyd" #
+      rlRun -s "systemctl restart fapolicyd" #
+      # rlRUn -s "journalctl -u fapolicyd" 0-255
+      rlRun -s "journalctl --since \"${$TIMESTAMP}\" | grep fapolicyd" 0 "Listing system log for fapolicyd"
+      rlAssertNotGrep 'Unknown pattern value normal' $rlRun_LOG
+      # rlRun "/usr/bin/ls" 1 "Verify the fapolicyd rule is successfully triggered"
+      rlRun "rm -f /etc/fapolicyd/rules.d/28-custom.rules"
+    rlPhaseEnd; }
+
     :
   tcfFin; }
 
