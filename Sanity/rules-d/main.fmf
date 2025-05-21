@@ -11,6 +11,8 @@ require+:
   - /usr/bin/yum-builddep
 recommend:
   - rpmbuild
+  - file-devel
+  - lmdb-devel
 tag:
   - Tier1
   - rhel-8.6.0

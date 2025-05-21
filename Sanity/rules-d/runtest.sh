@@ -33,6 +33,8 @@ rlJournalStart && {
   rlPhaseStartSetup && {
     rlRun "rlImport --all" 0 "Import libraries" || rlDie "cannot continue"
     tcfRun "rlCheckMakefileRequires" || rlDie "cannot continue"
+    rlRun "dnf repolist enabled | grep rhel-CRB" 0 "Check if required rhel-CRB repo is enabled" || rlDie "cannot continue"
+    # || "dnf config-manager --set-enabled rhel-CRB"
     IFS=' ' read -r SRC N V R A < <(rpm -q --qf '%{sourcerpm} %{name} %{version} %{release} %{arch}\n' fapolicyd)
     rlRun "TmpDir=\$(mktemp -d)" 0 "Creating tmp directory"
     CleanupRegister "rlRun 'rm -r $TmpDir' 0 'Removing tmp directory'"
@@ -371,17 +373,16 @@ EOF
       rlAssertGreater "rules are deployed into /etc/fapolicyd/rules.d" $(ls -1 /etc/fapolicyd/rules.d | wc -w) 0
     rlPhaseEnd; }
 
-    rlPhaseStartTest "custom rule pattern=normal (RHEL-30020)" && {
-      TIMESTAMP=`date "+%Y-%m-%d %H:%M:%S"`
+    rlPhaseStartTest "RHEL-30020 - custom rule pattern=normal" && {
+      rlRun "yum install fapolicyd -y --allowerasing"
+      rlRun "fapStart"
+      TIMESTAMP=$(date +"%F %T")
       rlRun "echo 'deny_audit perm=any pattern=normal : all' > /etc/fapolicyd/rules.d/28-custom.rules"
-      # rlRun -s "fapStart --debug" 1-255 #
-      # rlRun -s "systemctl stop fapolicyd" #
-      rlRun -s "systemctl restart fapolicyd" #
-      # rlRUn -s "journalctl -u fapolicyd" 0-255
-      rlRun -s "journalctl --since \"${$TIMESTAMP}\" | grep fapolicyd" 0 "Listing system log for fapolicyd"
-      rlAssertNotGrep 'Unknown pattern value normal' $rlRun_LOG
-      # rlRun "/usr/bin/ls" 1 "Verify the fapolicyd rule is successfully triggered"
-      rlRun "rm -f /etc/fapolicyd/rules.d/28-custom.rules"
+      CleanupRegister --mark "rlRun 'rm -f /etc/fapolicyd/rules.d/28-custom.rules'"
+      rlRun -s "systemctl restart fapolicyd"
+      rlRun -s "journalctl --since '${TIMESTAMP}' -u fapolicyd" 0 "Listing system log for fapolicyd"
+      rlAssertNotGrep "Unknown pattern value normal" $rlRun_LOG
+      CleanupDo --mark
     rlPhaseEnd; }
 
     :
