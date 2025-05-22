@@ -11,6 +11,8 @@ require+:
   - /usr/bin/yum-builddep
 recommend:
   - rpmbuild
+  - file-devel
+  - lmdb-devel
 tag:
   - Tier1
   - rhel-8.6.0
@@ -25,3 +27,4 @@ extra-nitrate: TC#0612915
 link:
   - verifies: https://bugzilla.redhat.com/show_bug.cgi?id=2054740
   - verifies: https://bugzilla.redhat.com/show_bug.cgi?id=2054741
+  - verifies: https://issues.redhat.com/browse/RHEL-30020
