@@ -373,17 +373,19 @@ EOF
       rlAssertGreater "rules are deployed into /etc/fapolicyd/rules.d" $(ls -1 /etc/fapolicyd/rules.d | wc -w) 0
     rlPhaseEnd; }
 
-    rlPhaseStartTest "RHEL-30020 - custom rule pattern=normal" && {
-      rlRun "yum install fapolicyd -y --allowerasing"
-      rlRun "fapStart"
-      TIMESTAMP=$(date +"%F %T")
-      rlRun "echo 'deny_audit perm=any pattern=normal : all' > /etc/fapolicyd/rules.d/28-custom.rules"
-      CleanupRegister --mark "rlRun 'rm -f /etc/fapolicyd/rules.d/28-custom.rules'"
-      rlRun -s "systemctl restart fapolicyd"
-      rlRun -s "journalctl --since '${TIMESTAMP}' -u fapolicyd" 0 "Listing system log for fapolicyd"
-      rlAssertNotGrep "Unknown pattern value normal" $rlRun_LOG
-      CleanupDo --mark
-    rlPhaseEnd; }
+    if rlIsRHELLike '>=9.7' ; then
+      rlPhaseStartTest "RHEL-30020 - custom rule pattern=normal" && {
+        rlRun "yum install fapolicyd -y --allowerasing"
+        rlRun "fapStart"
+        TIMESTAMP=$(date +"%F %T")
+        rlRun "echo 'deny_audit perm=any pattern=normal : all' > /etc/fapolicyd/rules.d/28-custom.rules"
+        CleanupRegister --mark "rlRun 'rm -f /etc/fapolicyd/rules.d/28-custom.rules'"
+        rlRun -s "systemctl restart fapolicyd"
+        rlRun -s "journalctl --since '${TIMESTAMP}' -u fapolicyd" 0 "Listing system log for fapolicyd"
+        rlAssertNotGrep "Unknown pattern value normal" $rlRun_LOG
+        CleanupDo --mark
+      rlPhaseEnd; }
+    fi
 
     :
   tcfFin; }
