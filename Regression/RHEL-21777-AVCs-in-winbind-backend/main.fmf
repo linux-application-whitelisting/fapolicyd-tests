@@ -1,0 +1,16 @@
+summary: Verify fapolicyd rules do not show AVCs for winbind backend.
+contact: Natália Bubáková <nbubakov@redhat.com>
+test: ./runtest.sh
+duration: 5m
+enabled: true
+recommend+:
+  - samba-winbind
+tag:
+  - Tier3
+tier: 3
+adjust+:
+  - enabled: false
+    when: distro < rhel-9.7
+    continue: false
+link:
+  - verifies: https://issues.redhat.com/browse/RHEL-21777
