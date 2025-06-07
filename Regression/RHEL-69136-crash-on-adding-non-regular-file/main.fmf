@@ -1,0 +1,17 @@
+summary: Verify that fapolicyd does not crash on adding directory with sockets to trust database
+contact: Natália Bubáková <nbubakov@redhat.com>
+test: ./runtest.sh
+duration: 5m
+enabled: true
+recommend+:
+  - socat
+  - library(ControlFlow/Cleanup)
+tag:
+  - Tier3
+tier: '3'
+adjust+:
+  - enabled: false
+    when: distro < rhel-9.7
+    continue: false
+links:
+  - verifies: https://issues.redhat.com/browse/RHEL-69136
