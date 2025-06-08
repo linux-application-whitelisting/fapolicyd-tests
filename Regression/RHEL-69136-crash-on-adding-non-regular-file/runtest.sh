@@ -49,10 +49,11 @@ rlJournalStart
 
         CleanupRegister 'rlRun "killall -9 socat" 0-255'
         rlRun "socat UNIX-LISTEN:"./socket_dir/socket" /dev/null &"
+        rlRun "sleep 3"
         CleanupRegister 'rlRun "fapolicyd-cli -f delete ./socket_dir" 0-255'
         rlRun -s "fapolicyd-cli -f add ./socket_dir" 0 "Add a directory with a socket to trust database"
-        rlAssertNotGrep "Segmentation fault (core dumped)" $rlRun_LOG
-        rlRun "fapolicyd-cli --dump-db | grep ~/socket_dir" 0 "Verify that the socket directory is in trust database"
+        rlAssertNotGrep "Segmentation fault[[:space:]]+\(core dumped\)" $rlRun_LOG -E
+        rlRun "fapolicyd-cli --dump-db | grep ${TmpDir}/socket_dir" 0 "Verify that the socket directory is in trust database"
     rlPhaseEnd
 
     rlPhaseStartCleanup
