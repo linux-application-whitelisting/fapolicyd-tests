@@ -384,6 +384,7 @@ EOF
         rlRun -s "journalctl --since '${TIMESTAMP}' -u fapolicyd" 0 "Listing system log for fapolicyd"
         rlAssertNotGrep "Unknown pattern value normal" $rlRun_LOG
         CleanupDo --mark
+        rlRun "fapStop" 0 "Stopping fapolicyd service"
       rlPhaseEnd; }
     fi
 
