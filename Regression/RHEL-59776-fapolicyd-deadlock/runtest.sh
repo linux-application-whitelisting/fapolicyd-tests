@@ -72,7 +72,7 @@ rlJournalStart && {
     journalctl -b -u fapolicyd | tail -n 10
 
     rlRun -s "fapServiceOut"
-    rlAssertGrep "Could not acquire lock for rpmdb, staying with old db" $rlRun_LOG
+    rlAssertGrep "fapolicyd-rpm-loader spawned with pid: [0-9]+" $rlRun_LOG -Eq
 
     CleanupDo --mark
   rlPhaseEnd; }
