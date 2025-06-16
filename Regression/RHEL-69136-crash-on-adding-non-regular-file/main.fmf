@@ -3,12 +3,13 @@ contact: Natália Bubáková <nbubakov@redhat.com>
 test: ./runtest.sh
 duration: 5m
 enabled: true
-recommend+:
-  - socat
+require+:
   - library(ControlFlow/Cleanup)
-tag:
-  - Tier3
-tier: '3'
+  - socat
+#disable tier tag for now
+#tag:
+#  - Tier3
+#tier: '3'
 adjust+:
   - enabled: false
     when: distro < rhel-9.7
