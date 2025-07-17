@@ -7,6 +7,7 @@ require+:
 - sed
 - dnf
 - gcc-c++
+recommend:
 - lmdb-devel
 duration: 5m
 enabled: true

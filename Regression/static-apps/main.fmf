@@ -7,6 +7,7 @@ require+:
   - library(distribution/testUser)
   - /usr/bin/readelf
   - gcc
+recommend:
   - glibc-static
 duration: 5m
 enabled: true
