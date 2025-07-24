@@ -60,4 +60,5 @@ rlJournalStart
     rlPhaseStartCleanup
         CleanupDo
     rlPhaseEnd
+    rlJournalPrintText
 rlJournalEnd

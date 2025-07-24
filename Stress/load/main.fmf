@@ -1,7 +1,7 @@
 description: a stress tests by loading a lot of python modules
 contact: Dalibor Pospíšil <dapospis@redhat.com>
 test: ./runtest.sh
-duration: 15m
+duration: 30m
 enabled: true
 require+:
   - library(distribution/tcf)

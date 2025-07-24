@@ -28,6 +28,7 @@
 # Include Beaker environment
 . /usr/bin/rhts-environment.sh || :
 . /usr/share/beakerlib/beakerlib.sh || exit 1
+PACKAGE="fapolicyd"
 
 rlJournalStart
     rlPhaseStartSetup
@@ -59,4 +60,5 @@ rlJournalStart
     rlPhaseStartCleanup
         CleanupDo
     rlPhaseEnd
+    rlJournalPrintText
 rlJournalEnd

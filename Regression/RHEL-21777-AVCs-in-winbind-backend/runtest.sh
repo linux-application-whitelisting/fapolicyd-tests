@@ -30,6 +30,7 @@
 
 # Include Beaker environment
 . /usr/share/beakerlib/beakerlib.sh || exit 1
+PACKAGE="fapolicyd"
 
 rlJournalStart
     rlPhaseStartSetup
@@ -62,4 +63,5 @@ rlJournalStart
         rlRun "popd"
         rlRun "rm -rf $TmpDir" 0 "Remove tmp directory"
     rlPhaseEnd
+    rlJournalPrintText
 rlJournalEnd
