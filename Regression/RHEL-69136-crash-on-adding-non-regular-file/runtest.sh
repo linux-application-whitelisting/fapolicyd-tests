@@ -3,7 +3,7 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 #   runtest.sh of /fapolicyd/Regression/RHEL-69136-crash-on-adding-non-regular-file
-#   Description: Verify that fapolicyd does not crash on adding directory with sockets to trust database
+#   Description: Verify that fapolicyd does not crash on adding directory with non-regular files (sockets, pipes) to trust database
 #   Author: Natália Bubáková <nbubakov@redhat.com>
 #
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -44,7 +44,7 @@ rlJournalStart
         rlRun "set -o pipefail"
     rlPhaseEnd
 
-    rlPhaseStartTest "Ignore directory with non-regular files (socket, pipe)"
+    rlPhaseStartTest
         TEST_DIR="non_regular_files_dir"
         CleanupRegister "rlRun 'rm -rf ./${TEST_DIR}'"
         mkdir -p ./${TEST_DIR}
