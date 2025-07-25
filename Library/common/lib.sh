@@ -274,7 +274,7 @@ This is RPM package, containing just a testing script.
 # let's skip this for now
 
 %build
-gcc -o fapTestProgram ../SOURCES/fapTestProgram.c
+gcc -o fapTestProgram %{_sourcedir}/fapTestProgram.c
 
 %install
 mkdir -p %{buildroot}${__INTERNAL_program_dir}
@@ -283,10 +283,10 @@ install -m 755 fapTestProgram %{buildroot}${__INTERNAL_program_dir}/fapTestProgr
 %files
 ${__INTERNAL_program_dir}/fapTestProgram
 
-#scriptlet
-
 %changelog
-# let's skip this for now
++ # Add a proper entry to fix the warning
++ * Fri Jul 25 2025 X Y <test@example.com> - 1-1
++ - Initial package creation
 EOS
 }
 
