@@ -50,9 +50,10 @@ rlJournalStart
         mkdir -p ./${TEST_DIR}
 
         CleanupRegister 'rlRun "killall -9 socat" 0-255'
-        rlRun "socat UNIX-LISTEN:"./${TEST_DIR}/socket" /dev/null &"
         rlRun "mkfifo ./${TEST_DIR}/pipe"
+        rlRun "socat UNIX-LISTEN:"./${TEST_DIR}/socket" /dev/null &"
         rlRun "sleep 3"
+        rlRun "test -S ./${TEST_DIR}/my.socket && test -p ./${TEST_DIR}/my.pipe" 0 "Verify non-regular files exist"
 
         CleanupRegister "rlRun 'fapolicyd-cli -f delete ./${TEST_DIR}' 0-255"
         rlRun -s "fapolicyd-cli -f add ./${TEST_DIR}" 0 "Add a directory with a socket to trust database"
