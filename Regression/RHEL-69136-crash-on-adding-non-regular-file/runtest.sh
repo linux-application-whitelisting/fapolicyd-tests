@@ -3,7 +3,7 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 #   runtest.sh of /fapolicyd/Regression/RHEL-69136-crash-on-adding-non-regular-file
-#   Description: Verify that fapolicyd does not crash on adding directory with sockets to trust database
+#   Description: Verify that fapolicyd does not crash on adding directory with non-regular files (sockets, pipes) to trust database
 #   Author: Natália Bubáková <nbubakov@redhat.com>
 #
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -45,16 +45,20 @@ rlJournalStart
     rlPhaseEnd
 
     rlPhaseStartTest
-        CleanupRegister 'rlRun "rm -rf ./socket_dir"'
-        mkdir -p ./socket_dir
+        TEST_DIR="non_regular_files_dir"
+        CleanupRegister "rlRun 'rm -rf ./${TEST_DIR}'"
+        mkdir -p ./${TEST_DIR}
 
         CleanupRegister 'rlRun "killall -9 socat" 0-255'
-        rlRun "socat UNIX-LISTEN:"./socket_dir/socket" /dev/null &"
+        rlRun "mkfifo ./${TEST_DIR}/pipe"
+        rlRun "socat UNIX-LISTEN:"./${TEST_DIR}/socket" /dev/null &"
         rlRun "sleep 3"
-        CleanupRegister 'rlRun "fapolicyd-cli -f delete ./socket_dir" 0-255'
-        rlRun -s "fapolicyd-cli -f add ./socket_dir" 0 "Add a directory with a socket to trust database"
+        rlRun "test -S ./${TEST_DIR}/my.socket && test -p ./${TEST_DIR}/my.pipe" 0 "Verify non-regular files exist"
+
+        CleanupRegister "rlRun 'fapolicyd-cli -f delete ./${TEST_DIR}' 0-255"
+        rlRun -s "fapolicyd-cli -f add ./${TEST_DIR}" 0 "Add a directory with a socket to trust database"
         rlAssertNotGrep "Segmentation fault[[:space:]]+\(core dumped\)" $rlRun_LOG -E
-        rlRun "fapolicyd-cli --dump-db | grep ${TmpDir}/socket_dir" 0 "Verify that the socket directory is in trust database"
+        rlRun "fapolicyd-cli --dump-db | grep ${TmpDir}/${TEST_DIR}" 1 "Verify that the socket directory is not in trust database"
     rlPhaseEnd
 
     rlPhaseStartCleanup
