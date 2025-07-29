@@ -33,8 +33,8 @@ PACKAGE="fapolicyd"
 rlJournalStart
     rlPhaseStartSetup
         rlRun "rlImport --all" 0 "Import libraries" || rlDie "cannot continue"
-        CleanupRegister "rlRun 'rm -r $TmpDir' 0 'Removing tmp directory'"
         rlRun "TmpDir=\$(mktemp -d)" 0 "Creating tmp directory"
+        CleanupRegister "rlRun 'rm -r $TmpDir' 0 'Removing tmp directory'"
         CleanupRegister 'rlRun "popd"'
         rlRun "pushd $TmpDir"
         CleanupRegister 'rlRun "fapCleanup"'
@@ -53,12 +53,12 @@ rlJournalStart
         rlRun "mkfifo ./${TEST_DIR}/pipe"
         rlRun "socat UNIX-LISTEN:"./${TEST_DIR}/socket" /dev/null &"
         rlRun "sleep 3"
-        rlRun "test -S ./${TEST_DIR}/my.socket && test -p ./${TEST_DIR}/my.pipe" 0 "Verify non-regular files exist"
+        rlRun "test -S ./${TEST_DIR}/socket && test -p ./${TEST_DIR}/pipe" 0 "Verify non-regular files exist"
 
         CleanupRegister "rlRun 'fapolicyd-cli -f delete ./${TEST_DIR}' 0-255"
-        rlRun -s "fapolicyd-cli -f add ./${TEST_DIR}" 0 "Add a directory with a socket to trust database"
+        rlRun -s "fapolicyd-cli -f add ./${TEST_DIR}" 1 "Add a directory with non-regular files to trust database"
         rlAssertNotGrep "Segmentation fault[[:space:]]+\(core dumped\)" $rlRun_LOG -E
-        rlRun "fapolicyd-cli --dump-db | grep ${TmpDir}/${TEST_DIR}" 1 "Verify that the socket directory is not in trust database"
+        rlRun "fapolicyd-cli --dump-db | grep ${TmpDir}/${TEST_DIR}" 1 "Verify that the directory is not in trust database"
     rlPhaseEnd
 
     rlPhaseStartCleanup
