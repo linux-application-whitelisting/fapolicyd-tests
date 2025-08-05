@@ -35,16 +35,14 @@ PACKAGE="fapolicyd"
 rlJournalStart
     rlPhaseStartSetup
         rlRun "rlImport --all" 0 "Import libraries" || rlDie "cannot continue"
-        rlRun 'TmpDir=$(mktemp -d)' 0 'Creating tmp directory'
+        rlRun "TmpDir=$(mktemp -d)" 0 'Creating tmp directory'
         rlRun "pushd $TmpDir"
-        rlFileBackup /etc/nsswitch.conf
+        rlFileBackup /etc/nsswitch.conf /etc/pam.d
         rlRun "set -o pipefail"
-        rlRun -s "authselect current" 0 "Save current authselect profile"
-        ORIG_AUTHSELECT_PROFILE=$(cat $rlRun_LOG | awk -F ': ' '/Profile ID/ {print $2}')
     rlPhaseEnd
 
     rlPhaseStartTest
-        rlRun "authselect select winbind"
+        rlRun "authselect select winbind --force"
         rlRun "sudo sed -i -E 's/^(passwd|group):[[:space:]]*(.*)winbind(.*)$/\1: winbind \2\3/' /etc/nsswitch.conf"
         rlRun "grep -E '^(passwd|group):[[:space:]]*winbind' /etc/nsswitch.conf" 0 "Check winbind is the first in order"
         rlRun "systemctl start winbind"
@@ -56,7 +54,6 @@ rlJournalStart
 
     rlPhaseStartCleanup
         rlFileRestore
-        rlRun "authselect select $ORIG_AUTHSELECT_PROFILE"
         rlRun "systemctl daemon-reload"
         rlRun "systemctl stop winbind"
         rlRun "systemctl restart fapolicyd"
