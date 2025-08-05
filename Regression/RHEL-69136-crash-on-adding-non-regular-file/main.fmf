@@ -6,10 +6,9 @@ enabled: true
 require+:
   - library(ControlFlow/Cleanup)
   - socat
-#disable tier tag for now
-#tag:
-#  - Tier3
-#tier: '3'
+tag:
+ - Tier3
+tier: '3'
 adjust+:
   - enabled: false
     when: distro < rhel-9.7
