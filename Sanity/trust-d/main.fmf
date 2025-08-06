@@ -18,3 +18,4 @@ adjust+:
     continue: false
 extra-nitrate: TC#0612665
 extra-summary: tests/fapolicyd/Sanity/trust-d - Test for trust.d directory
+id: 53b5162a-f3cf-4d3d-a7cc-4ddb0e953885

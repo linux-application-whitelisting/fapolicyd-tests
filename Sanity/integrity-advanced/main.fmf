@@ -5,15 +5,15 @@ description: |
     Bug summary: Rebase FAPOLICYD to the latest upstream version
     Bugzilla link: https://bugzilla.redhat.com/show_bug.cgi?id=1887451
 contact:
-- Patrik Koncity <pkoncity@redhat.com>
+  - Patrik Koncity <pkoncity@redhat.com>
 component:
-- fapolicyd
+  - fapolicyd
 test: ./runtest.sh
 require+:
-- fapolicyd
-- library(ControlFlow/Cleanup)
-- library(distribution/testUser)
-- attr
+  - fapolicyd
+  - library(ControlFlow/Cleanup)
+  - library(distribution/testUser)
+  - attr
 duration: 5m
 extra-summary: /CoreOS/fapolicyd/Sanity/integrity
 extra-task: /CoreOS/fapolicyd/Sanity/integrity
@@ -22,3 +22,4 @@ adjust+:
   - when: distro == rhel-8 or distro = centos-stream-8
     enabled: false
     because: RHEL-8 has old kernel and IMA setup is disabled
+id: 4eb47b05-c633-4ea8-ac64-91de2ea62f75

@@ -5,26 +5,27 @@ description: |
 contact: Dalibor Pospíšil <dapospis@redhat.com>
 test: ./runtest.sh
 require+:
-- library(distribution/Cleanup)
+  - library(distribution/Cleanup)
 recommend:
-- fapolicyd
+  - fapolicyd
 duration: 5m
 enabled: true
 tag:
-- CI-Tier-1
-- NoRHEL4
-- NoRHEL5
-- TIPfail
-- Tier3
-- rhel-8.3.0
+  - CI-Tier-1
+  - NoRHEL4
+  - NoRHEL5
+  - TIPfail
+  - Tier3
+  - rhel-8.3.0
 tier: '3'
 extra-summary: /CoreOS/fapolicyd/Regression/bz1817413-segfault-on-update
 extra-task: /CoreOS/fapolicyd/Regression/bz1817413-segfault-on-update
 extra-nitrate: TC#0607380
 adjust+:
--   enabled: false
+  - enabled: false
     when: distro < rhel-8
     continue: false
--   enabled: false
+  - enabled: false
     when: distro ~< rhel-8.3
     continue: false
+id: 1dd1d28d-de5a-41e0-904a-769635913b77

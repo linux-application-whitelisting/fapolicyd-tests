@@ -1,11 +1,12 @@
-summary: fapolicyd.service badly instructs how to start after nss-user-lookup.target
+summary: fapolicyd.service badly instructs how to start after 
+    nss-user-lookup.target
 contact: Natália Bubáková <nbubakov@redhat.com>
 test: ./runtest.sh
 duration: 5m
 require+:
   - library(ControlFlow/Cleanup)
 tag:
- - Tier3
+  - Tier3
 tier: '3'
 enabled: true
 adjust+:
@@ -14,3 +15,4 @@ adjust+:
     continue: false
 link:
   - verifies: https://issues.redhat.com/browse/RHEL-21871
+id: 4c45bc72-5c15-4ddf-8764-8a50ad0c7dd6

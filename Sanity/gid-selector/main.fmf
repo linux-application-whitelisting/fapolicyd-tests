@@ -2,16 +2,17 @@ summary: Test for GID selector
 contact: Dalibor Pospíšil <dapospis@redhat.com>
 test: ./runtest.sh
 require+:
-- library(distribution/dpcommon)
-- library(distribution/testUser)
+  - library(distribution/dpcommon)
+  - library(distribution/testUser)
 duration: 5m
 tag:
-- Tier2
-- rhel-8.4.0
-- CI-Tier-1
+  - Tier2
+  - rhel-8.4.0
+  - CI-Tier-1
 tier: '2'
 adjust+:
--   enabled: false
+  - enabled: false
     when: distro < rhel-8.4
     continue: false
 extra-nitrate: TC#0609337
+id: f861c092-a801-4c0b-8e92-ccdb7b0d76d8

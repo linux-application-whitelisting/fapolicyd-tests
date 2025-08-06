@@ -1,23 +1,24 @@
-summary: The evaluator will configure fapolicyd to allow execution of executable based
-    on path. The evaluator will then attempt to execute two executables. The evaluator
-    will ensure that the executable that is allowed to run has been executed and the
-    executable that is not allowed to run will be denied.
+summary: The evaluator will configure fapolicyd to allow execution of executable
+    based on path. The evaluator will then attempt to execute two executables. 
+    The evaluator will ensure that the executable that is allowed to run has 
+    been executed and the executable that is not allowed to run will be denied.
 description: ''
 contact: Dalibor Pospíšil <dapospis@redhat.com>
 component: []
 test: ./runtest.sh
 require+:
-- fapolicyd
-- gcc
+  - fapolicyd
+  - gcc
 duration: 25m
 enabled: true
 tag:
-- CI-Tier-1
-- rhel-8.1
+  - CI-Tier-1
+  - rhel-8.1
 extra-summary: /CoreOS/fapolicyd/Sanity/FapolicydRules
 extra-task: /CoreOS/fapolicyd/Sanity/FapolicydRules
 extra-nitrate: TC#0602863
 adjust+:
--   enabled: false
+  - enabled: false
     when: distro < rhel-8
     continue: false
+id: c41c4dbe-26a0-468f-b948-3b557f01283d

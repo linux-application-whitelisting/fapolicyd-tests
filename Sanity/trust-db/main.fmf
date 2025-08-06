@@ -5,29 +5,30 @@ description: |
 contact: Dalibor Pospíšil <dapospis@redhat.com>
 test: ./runtest.sh
 require+:
-- library(distribution/dpcommon)
-- library(distribution/ConditionalPhases)
+  - library(distribution/dpcommon)
+  - library(distribution/ConditionalPhases)
 recommend:
-- fapolicyd
+  - fapolicyd
 duration: 5m
 enabled: true
 tag:
-- CI-Tier-1
-- NoRHEL4
-- NoRHEL5
-- SP-TBU
-- TIPfail
-- Tier2
-- rhel-8.3.0
-- ImageMode
+  - CI-Tier-1
+  - NoRHEL4
+  - NoRHEL5
+  - SP-TBU
+  - TIPfail
+  - Tier2
+  - rhel-8.3.0
+  - ImageMode
 tier: '2'
 extra-summary: /CoreOS/fapolicyd/Sanity/trust-db
 extra-task: /CoreOS/fapolicyd/Sanity/trust-db
 extra-nitrate: TC#0607484
 adjust+:
--   enabled: false
+  - enabled: false
     when: distro < rhel-8
     continue: false
--   enabled: false
+  - enabled: false
     when: distro ~< rhel-8.3
     continue: false
+id: 718dac59-a1ca-497d-9d20-24a67f23359a

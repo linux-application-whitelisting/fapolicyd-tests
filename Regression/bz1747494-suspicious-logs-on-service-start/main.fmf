@@ -1,28 +1,33 @@
 summary: Test for BZ#1747494 (suspicious logs on service start )
-description: "Bug summary: suspicious logs on service start \nBugzilla link: https://bugzilla.redhat.com/show_bug.cgi?id=1747494\n"
+description: |
+    Bug summary: suspicious logs on service start 
+    Bugzilla link: https://bugzilla.redhat.com/show_bug.cgi?id=1747494
 contact: Dalibor Pospíšil <dapospis@redhat.com>
 test: ./runtest.sh
 require+:
-- fapolicyd
-- sed
-- dnf
-- gcc-c++
+  - fapolicyd
+  - sed
+  - dnf
+  - gcc-c++
 recommend:
-- lmdb-devel
+  - lmdb-devel
 duration: 5m
 enabled: true
 tag:
-- CI-Tier-1
-- TIPfail
-- rhel-8.2
-- rhel-buildroot
-extra-summary: /CoreOS/fapolicyd/Regression/bz1747494-suspicious-logs-on-service-start
-extra-task: /CoreOS/fapolicyd/Regression/bz1747494-suspicious-logs-on-service-start
+  - CI-Tier-1
+  - TIPfail
+  - rhel-8.2
+  - rhel-buildroot
+extra-summary: 
+    /CoreOS/fapolicyd/Regression/bz1747494-suspicious-logs-on-service-start
+extra-task: 
+    /CoreOS/fapolicyd/Regression/bz1747494-suspicious-logs-on-service-start
 extra-nitrate: TC#0605063
 adjust+:
--   enabled: false
+  - enabled: false
     when: distro ~< rhel-8.2
     continue: false
--   enabled: false
+  - enabled: false
     when: distro < rhel-8
     continue: false
+id: 60150f19-990e-4f5d-9832-b6c83ba42c3b

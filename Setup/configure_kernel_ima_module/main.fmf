@@ -2,17 +2,18 @@ summary: Configures kernel ima module on a running system
 description: Enables kernel_ima on a tested system
 contact: Patrik Koncity <pkoncity@redhat.com>
 component:
-- keylime
+  - keylime
 test: ./runtest.sh
 tag:
-- setup
+  - setup
 framework: beakerlib
 require:
-- grubby
-- openssl
+  - grubby
+  - openssl
 duration: 10m
 enabled: true
 adjust+:
   - when: distro == rhel-8 or distro = centos-stream-8
     enabled: false
     because: RHEL-8 has old kernel
+id: 7d598f14-197f-495d-b682-cc540f0a74b5

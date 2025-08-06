@@ -5,30 +5,31 @@ description: |
 contact: Dalibor Pospíšil <dapospis@redhat.com>
 test: ./runtest.sh
 require+:
-- library(distribution/dpcommon)
-- library(distribution/testUser)
+  - library(distribution/dpcommon)
+  - library(distribution/testUser)
 recommend:
-- fapolicyd
-- rpmdevtools
-- rpm-build
+  - fapolicyd
+  - rpmdevtools
+  - rpm-build
 duration: 5m
 enabled: true
 tag:
-- CI-Tier-1
-- NoRHEL4
-- NoRHEL5
-- NoRHEL6
-- NoRHEL7
-- Tier2
-- rhel-8.2.0
+  - CI-Tier-1
+  - NoRHEL4
+  - NoRHEL5
+  - NoRHEL6
+  - NoRHEL7
+  - Tier2
+  - rhel-8.2.0
 tier: '2'
 extra-summary: /CoreOS/fapolicyd/Sanity/users-shell-script
 extra-task: /CoreOS/fapolicyd/Sanity/users-shell-script
 extra-nitrate: TC#0605875
 adjust+:
--   enabled: false
+  - enabled: false
     when: distro < rhel-8
     continue: false
--   enabled: false
+  - enabled: false
     when: distro ~< rhel-8.2
     continue: false
+id: 7ab78033-d4df-42f6-aa71-fb1eaadb9b54
