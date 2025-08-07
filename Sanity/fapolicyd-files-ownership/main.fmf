@@ -1,0 +1,20 @@
+summary: Verify correct file ownership
+description: Verifies if important fapolicyd files have correct ownership
+contact: Natália Bubáková <nbubakov@redhat.com>
+component:
+  - fapolicyd
+test: ./runtest.sh
+framework: beakerlib
+recommend:
+  - usbguafapolicydrd
+duration: 5m
+enabled: true
+tag:
+  - CI-Tier-1
+  - Tier1
+tier: '1'
+adjust:
+  - enabled: false
+    when: distro == rhel-4, rhel-5, rhel-6, rhel-7, rhel-8
+    continue: false
+id: d85dd357-7383-4a1a-bc28-f7cb870051f7
