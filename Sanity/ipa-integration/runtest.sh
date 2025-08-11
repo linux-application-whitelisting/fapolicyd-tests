@@ -49,6 +49,10 @@ rlJournalStart && {
     CleanupRegister "rlRun 'rm -r $TmpDir' 0 'Removing tmp directory'"
     CleanupRegister 'rlRun "popd"'
     rlRun "pushd $TmpDir"
+    rlFileBackup "/etc/hosts"
+    # Set temporary hostname for test as IPA server hostname must be shorter than 64 characters
+    [[ `hostname -A | awk '{print $1}' | wc -c` -gt 64 ]] && \
+    rlRun "echo \"`hostname -i` ipa`date +%s`.`hostname -A | awk '{print $1}' | sed 's/^[^.]*\.//'` \" | sudo tee -a /etc/hosts"
   rlPhaseEnd; }
 
   tcfTry "Tests" --no-assert && {
@@ -59,6 +63,7 @@ rlJournalStart && {
       #rlAssertGrep "" $rlRun_LOG
       rm -f $rlRun_LOG
     rlPhaseEnd; }
+
     rlPhaseStartTest "check ipa-server-install" && {
       CleanupRegister --mark 'rlRun "fapCleanup"'
       if rlIsRHELLike '>=10'; then
@@ -76,13 +81,10 @@ EOF"
       fapServiceOut -b -f
       CleanupRegister "kill $!"
       h=( $(hostname -A) )
-      IPA_MACHINE_HOSTNAME=`hostname`
+      # IPA_MACHINE_HOSTNAME=`hostname`
       IPA_MACHINE_HOSTNAME="${h[0]}"
-      DOMAIN_NAME=`hostname -d`
+      # DOMAIN_NAME=`hostname -d`
       DOMAIN_NAME="$(echo "${h[0]}" | sed 's/^[^.]*\.//')"
-      if rlIsRHELLike '>=10'; then
-        DOMAIN_NAME="domain.com"
-      fi
       REALM_NAME="TESTREALM.COM"
       DM_PASSWORD="Secret123"
       MASTER_PASSWORD="Secret123"
@@ -101,6 +103,7 @@ EOF"
   rlPhaseStartCleanup && {
     CleanupDo
     tcfCheckFinal
+    rlFileRestore
   rlPhaseEnd; }
   rlJournalPrintText
 rlJournalEnd; }
