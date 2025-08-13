@@ -1,4 +1,5 @@
-summary: Verify that fapolicyd does not crash on adding directory with non-regular files (sockets, pipes) to trust database
+summary: Verify that fapolicyd does not crash on adding directory with 
+    non-regular files (sockets, pipes) to trust database
 contact: Natália Bubáková <nbubakov@redhat.com>
 test: ./runtest.sh
 duration: 5m
@@ -7,7 +8,7 @@ require+:
   - library(ControlFlow/Cleanup)
   - socat
 tag:
- - Tier3
+  - Tier3
 tier: '3'
 adjust+:
   - enabled: false
@@ -15,3 +16,4 @@ adjust+:
     continue: false
 links:
   - verifies: https://issues.redhat.com/browse/RHEL-69136
+id: e2c6b00f-cba4-4376-8c8b-651f97fd1e04

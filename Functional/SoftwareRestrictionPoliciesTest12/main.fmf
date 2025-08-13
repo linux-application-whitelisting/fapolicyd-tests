@@ -4,22 +4,23 @@ contact: Dalibor Pospíšil <dapospis@redhat.com>
 component: []
 test: ./runtest.sh
 require+:
-- fapolicyd
-- gcc
-- sudo
-- /usr/bin/su
+  - fapolicyd
+  - gcc
+  - sudo
+  - /usr/bin/su
 duration: 25m
 enabled: true
 tag:
-- NoRHEL4
-- NoRHEL5
-- TIPfail
-- fedora-wanted
-- rhel-8.1
+  - NoRHEL4
+  - NoRHEL5
+  - TIPfail
+  - fedora-wanted
+  - rhel-8.1
 extra-summary: /CoreOS/fapolicyd/Functional/SoftwareRestrictionPoliciesTest12
 extra-task: /CoreOS/fapolicyd/Functional/SoftwareRestrictionPoliciesTest12
 extra-nitrate: TC#0602860
 adjust+:
--   enabled: false
+  - enabled: false
     when: distro == rhel-4, rhel-5
     continue: false
+id: 1e379d03-df85-472c-8211-7b95e5d9eca6

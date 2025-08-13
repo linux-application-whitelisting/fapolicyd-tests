@@ -1,22 +1,26 @@
 summary: Test for BZ#1765039 (fapolicyd fails to identify perl interpreter )
-description: "Bug summary: fapolicyd fails to identify perl interpreter \nBugzilla\
-    \ link: https://bugzilla.redhat.com/show_bug.cgi?id=1765039\n"
+description: |
+    Bug summary: fapolicyd fails to identify perl interpreter 
+    Bugzilla link: https://bugzilla.redhat.com/show_bug.cgi?id=1765039
 contact: Dalibor Pospíšil <dapospis@redhat.com>
 test: ./runtest.sh
 require+:
-- fapolicyd
-- sed
-- dnf
+  - fapolicyd
+  - sed
+  - dnf
 duration: 5m
 enabled: true
 tag:
-- CI-Tier-1
-- TIPfail
-- rhel-8.2
-extra-summary: /CoreOS/fapolicyd/Regression/bz1765039-fapolicyd-fails-to-identify-perl-interpreter
-extra-task: /CoreOS/fapolicyd/Regression/bz1765039-fapolicyd-fails-to-identify-perl-interpreter
+  - CI-Tier-1
+  - TIPfail
+  - rhel-8.2
+extra-summary: 
+    /CoreOS/fapolicyd/Regression/bz1765039-fapolicyd-fails-to-identify-perl-interpreter
+extra-task: 
+    /CoreOS/fapolicyd/Regression/bz1765039-fapolicyd-fails-to-identify-perl-interpreter
 extra-nitrate: TC#0605033
 adjust+:
--   enabled: false
+  - enabled: false
     when: distro ~< rhel-8.2
     continue: false
+id: f9ea2fe6-d3c4-4192-ba07-e9726d672f69

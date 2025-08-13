@@ -1,4 +1,5 @@
-summary: Test scenario with bootc upgrade and rpm ostree for package update while fapolicyd is active
+summary: Test scenario with bootc upgrade and rpm ostree for package update 
+    while fapolicyd is active
 contact: Natália Bubáková <nbubakov@redhat.com>
 test: ./runtest.sh
 tag:
@@ -12,8 +13,4 @@ recommend+:
   - gcc
 duration: 25m
 enabled: true
-
-# enabled: false
-# adjust+:
-#   - when: deploymentmode is defined and deploymentmode == image
-#     enabled: true
+id: f129890a-0a29-4673-b453-9209cd8e0d32

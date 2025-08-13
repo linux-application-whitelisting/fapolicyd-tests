@@ -5,32 +5,33 @@ description: |
 contact: Dalibor Pospíšil <dapospis@redhat.com>
 test: ./runtest.sh
 require+:
-- library(distribution/dpcommon)
-- library(distribution/ConditionalPhases)
+  - library(distribution/dpcommon)
+  - library(distribution/ConditionalPhases)
 recommend:
-- fapolicyd
+  - fapolicyd
 duration: 5m
 enabled: true
 tag:
-- CI-Tier-1
-- NoRHEL4
-- NoRHEL5
-- SP-TBU
-- TIPfail
-- Tier1
-- rhel-8.3.0
-- ImageMode
+  - CI-Tier-1
+  - NoRHEL4
+  - NoRHEL5
+  - SP-TBU
+  - TIPfail
+  - Tier1
+  - rhel-8.3.0
+  - ImageMode
 tier: '1'
 extra-summary: /CoreOS/fapolicyd/Sanity/cli-options
 extra-task: /CoreOS/fapolicyd/Sanity/cli-options
 extra-nitrate: TC#0607379
 adjust+:
--   enabled: false
+  - enabled: false
     when: distro < rhel-8
     continue: false
--   enabled: false
+  - enabled: false
     when: distro ~< rhel-8.3
     continue: false
 link:
   - verifies: https://bugzilla.redhat.com/show_bug.cgi?id=1989272
   - verifies: https://bugzilla.redhat.com/show_bug.cgi?id=2015307
+id: d6f2e52a-10d3-4fab-9b25-16ae2cdd0600

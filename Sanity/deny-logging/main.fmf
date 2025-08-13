@@ -3,15 +3,16 @@ contact: Dalibor Pospíšil <dapospis@redhat.com>
 test: ./runtest.sh
 duration: 5m
 tag:
-- Tier2
-- rhel-8.3.0
+  - Tier2
+  - rhel-8.3.0
 tier: '2'
 require+:
-- audit
-- library(distribution/dpcommon)
-- library(distribution/testUser)
+  - audit
+  - library(distribution/dpcommon)
+  - library(distribution/testUser)
 adjust+:
--   enabled: false
+  - enabled: false
     when: distro < rhel-8.3
     continue: false
 extra-nitrate: TC#0609334
+id: 441a9234-b9fc-4114-b51d-9c2e505a9b31

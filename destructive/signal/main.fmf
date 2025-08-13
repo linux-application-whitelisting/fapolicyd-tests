@@ -7,83 +7,140 @@ duration: 15m
 /external:
     link:
       - verifies: https://issues.redhat.com/browse/RHEL-15498
-
     /ALRM:
+        id: 3e24275d-edb3-481e-a213-340636278f52
     /BUS:
+        id: 2d18aae9-5b13-4ce3-b3e3-b259cb8fa55a
     /CHLD:
+        id: c056e58e-ff33-4d6f-8582-9f8b6b852811
     /CONT:
+        id: f6464de0-ba4f-4c8a-b15e-21a7784940e6
     /FPE:
+        id: 132c8474-7fde-4982-acda-2053bb69d5d8
     /HUP:
+        id: f9c1530c-79fc-4ea5-9ac5-5fd3d1dfe936
     /ILL:
+        id: 2b3fd8e5-d64c-41d6-8489-2dabd90afa7c
     /IO:
+        id: 56af6eed-0795-4c35-aae9-02b16f9dc4f6
     /KILL:
+        id: f1ffeb54-35d0-4d1b-8a69-a33073a23343
     /PIPE:
+        id: 9d20e782-6081-4af5-88d2-2d781615971d
     /PROF:
+        id: 403d3004-3381-4b42-9d1b-fdc30e5189b6
     /PWR:
+        id: 3182d05b-dae6-4eaf-99a0-5f68ca767f4b
     /SEGV:
+        id: 50e0a490-7106-41de-8e75-0f682bd14d88
     /STKFLT:
+        id: 675f252f-409d-4e5a-b594-60d097ceb325
     /TSTP:
+        id: 9324113b-e660-4245-a96e-490541053bf4
     /SYS:
+        id: 2e145986-1323-4d01-aed1-48674893512b
     /TRAP:
+        id: 04e8029f-ccfa-49af-9cdf-94a1a962e7db
     /TTIN:
+        id: 77c8a753-d030-4ec2-80c1-dc838758c494
     /TTOU:
+        id: aca8f00c-d41d-47cd-8f44-d892f1062117
     /URG:
+        id: ca080c57-449a-48f8-b482-d2abf368c12a
     /USR1:
+        id: e313cc95-ec71-49fc-babe-4e93d40d242f
     /USR2:
+        id: a1ddb16b-3699-4e46-89d6-c091ffcf305a
     /VTALRM:
+        id: 851b93d3-95bf-4816-ba20-b55de76c631e
     /XCPU:
+        id: 6ec81a8e-111e-45fe-81c8-c7b034116e67
     /XFSZ:
+        id: b9648aa5-24fc-4ed0-8ea9-1ad099a455ae
     /WINCH:
-
+        id: 913f0afa-f2ab-400a-854a-007b30a7c733
 /external-hardened:
     adjust+:
       - when: distro < rhel-9.5
         enabled: false
         continue: false
     /STOP:
-
+        id: e2c44389-677b-4059-91b7-48d1a6e68962
 /external-unblockable:
     enabled: false
     /ABRT:
+        id: 45075137-5d1c-480f-a055-ad9f6b2ec7a1
     /INT:
+        id: ef1b3cc7-539e-4817-8e4d-0f800ecf5844
     /QUIT:
+        id: 51022791-f075-4699-8233-fda26ad3deb8
     /TERM:
-
+        id: 116de99e-ced2-4e5e-85cd-90cb7c1acb2c
 /internal:
     /ABRT:
+        id: ba6b10b6-4a29-427f-9577-9f80e9ef5d4a
     /ALRM:
+        id: 89da08c2-31a9-48c2-80fa-530687bf8a14
     /BUS:
+        id: 5bb427fd-763c-44b4-847c-f40e3d295bb1
     /CHLD:
+        id: 5cb5c06d-5fed-4dfc-abdb-4bc737f9edd4
     /CONT:
+        id: c1a7168f-014e-4e00-ac75-bc777da207fd
     /FPE:
+        id: c6863c4c-4307-4f4b-90ee-3bbd2a6cb56a
     /HUP:
+        id: 829e2780-286e-4910-a13a-3dc50f17a8bb
     /ILL:
+        id: 30478c8a-61ee-44c4-9046-d87cfc5f5784
     /INT:
+        id: eaf81f96-a361-4ed9-88ad-c57c8c17ae2f
     /IO:
+        id: f2fa5035-bf8e-404d-a6d5-a0d117936d55
     /KILL:
+        id: cc940f81-a827-441c-831b-43c77b3f2ab3
     /PIPE:
+        id: d73ab6a3-095f-4cfe-949c-24ecc2181783
     /PROF:
+        id: e90844dc-275a-40ec-8a36-f8f16167156e
     /PWR:
+        id: 7c5eb207-c41a-4c79-bd3e-d7062c0923b2
     /QUIT:
+        id: f9ce84b4-ff7b-4a60-b449-ec3a216f8db9
     /SEGV:
+        id: b981d760-81a2-4932-8dd5-cab646843085
     /STKFLT:
+        id: f5c817a6-7d1f-439a-81ec-9aed9bf11dd2
     /TSTP:
+        id: 5622471a-78e0-4b8d-b431-4135fa6bd22f
     /SYS:
+        id: 23e99731-631e-47ba-9a3c-49396fa4a737
     /TERM:
+        id: ba8ef287-5f75-4ce5-a5db-3dee7d922359
     /TRAP:
+        id: eb71da98-4ecf-4360-86e9-dc13f51202d9
     /TTIN:
+        id: 532888e4-20a3-4605-a44c-09042ea7560e
     /TTOU:
+        id: ea6c17e1-3ea4-4d0c-bae6-6f7227af92f5
     /URG:
+        id: 07d276c3-3a3a-4bfd-b0c7-03274ea31e25
     /USR1:
+        id: 199fe4f7-4ad5-4634-971a-2708412c1fe6
     /USR2:
+        id: 85c3a6e4-b241-439a-9d4d-f4f9d98a4371
     /VTALRM:
+        id: 556940a4-4545-4aff-bb73-5af476314692
     /XCPU:
+        id: 28c0fa35-df85-4fdd-8144-457ae413ba56
     /XFSZ:
+        id: c68d1142-38d4-4137-a259-e500c12c7a18
     /WINCH:
-
+        id: cfbc6bd7-480f-41f9-a655-d5598bd827b6
 /internal-hardened:
     adjust+:
       - enabled: false
         when: distro < rhel-9.5
         continue: false
     /STOP:
+        id: 91899f5d-a9c4-4641-8743-213cc9004800

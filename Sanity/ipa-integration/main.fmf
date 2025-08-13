@@ -20,3 +20,4 @@ adjust+:
     when: distro < rhel-8.1
 extra-summary: /CoreOS/fapolicyd/Sanity/ipa-integration
 extra-nitrate: TC#0609043
+id: e9f27dee-a923-4a02-b68f-ad88dcbabbcb

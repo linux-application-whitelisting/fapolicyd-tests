@@ -1,47 +1,55 @@
-summary: Test for BZ#1757736 (fapolicyd blocks dracut from generating initramfs )
-description: "Bug summary: fapolicyd blocks dracut from generating initramfs \nBugzilla\
-    \ link: https://bugzilla.redhat.com/show_bug.cgi?id=1757736\n"
+summary: Test for BZ#1757736 (fapolicyd blocks dracut from generating initramfs 
+    )
+description: |
+    Bug summary: fapolicyd blocks dracut from generating initramfs 
+    Bugzilla link: https://bugzilla.redhat.com/show_bug.cgi?id=1757736
 contact: Dalibor Pospíšil <dapospis@redhat.com>
 test: ./runtest.sh
 require+:
-- fapolicyd
-- dracut
-- sed
-- dnf
+  - fapolicyd
+  - dracut
+  - sed
+  - dnf
 duration: 30m
 enabled: true
 tag:
-- Tier3
-- rhel-8.2
+  - Tier3
+  - rhel-8.2
 tier: 3
 adjust+:
-- enabled: false
-  when: distro < rhel-8.2
+  - enabled: false
+    when: distro < rhel-8.2
 link:
   - verifies: https://bugzilla.redhat.com/show_bug.cgi?id=2066300
   - verifies: https://bugzilla.redhat.com/show_bug.cgi?id=2068052
-
 /base:
-  extra-summary: /CoreOS/fapolicyd/Regression/bz1757736-fapolicyd-blocks-dracut-from-generating-initramfs
-  extra-task: /CoreOS/fapolicyd/Regression/bz1757736-fapolicyd-blocks-dracut-from-generating-initramfs
-  extra-nitrate: TC#0605034
-
+    extra-summary: 
+        /CoreOS/fapolicyd/Regression/bz1757736-fapolicyd-blocks-dracut-from-generating-initramfs
+    extra-task: 
+        /CoreOS/fapolicyd/Regression/bz1757736-fapolicyd-blocks-dracut-from-generating-initramfs
+    extra-nitrate: TC#0605034
+    id: 34878ed4-fc75-447c-b5e9-64ac8ca34b29
 /integrity-size:
-  extra-summary: FAINTEGRITY=size /CoreOS/fapolicyd/Regression/bz1757736-fapolicyd-blocks-dracut-from-generating-initramfs
-  extra-task: /CoreOS/fapolicyd/Regression/bz1757736-fapolicyd-blocks-dracut-from-generating-initramfs
-  extra-nitrate: TC#0609921
-  environment:
-    FAINTEGRITY: size
-  adjust+:
-  - enabled: false
-    when: distro < rhel-8.4
-
+    extra-summary: FAINTEGRITY=size 
+        /CoreOS/fapolicyd/Regression/bz1757736-fapolicyd-blocks-dracut-from-generating-initramfs
+    extra-task: 
+        /CoreOS/fapolicyd/Regression/bz1757736-fapolicyd-blocks-dracut-from-generating-initramfs
+    extra-nitrate: TC#0609921
+    environment:
+        FAINTEGRITY: size
+    adjust+:
+      - enabled: false
+        when: distro < rhel-8.4
+    id: 876e84e1-6bb1-435b-8a12-ebe7b9533d5a
 /integrity-sha256:
-  extra-summary: FAINTEGRITY=sha256 /CoreOS/fapolicyd/Regression/bz1757736-fapolicyd-blocks-dracut-from-generating-initramfs
-  extra-task: /CoreOS/fapolicyd/Regression/bz1757736-fapolicyd-blocks-dracut-from-generating-initramfs
-  extra-nitrate: TC#0609920
-  environment:
-    FAINTEGRITY: sha256
-  adjust+:
-  - enabled: false
-    when: distro < rhel-8.4
+    extra-summary: FAINTEGRITY=sha256 
+        /CoreOS/fapolicyd/Regression/bz1757736-fapolicyd-blocks-dracut-from-generating-initramfs
+    extra-task: 
+        /CoreOS/fapolicyd/Regression/bz1757736-fapolicyd-blocks-dracut-from-generating-initramfs
+    extra-nitrate: TC#0609920
+    environment:
+        FAINTEGRITY: sha256
+    adjust+:
+      - enabled: false
+        when: distro < rhel-8.4
+    id: c746bbd5-1e68-48f1-add4-ba8e3433f9f7
