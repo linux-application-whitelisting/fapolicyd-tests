@@ -76,28 +76,23 @@ EOF
     pushd rpms
     rlRun "cp $(grep 'Wrote:' $rlRun_LOG | cut -d ' ' -f 2 | tr '\n' ' ') $(grep 'Wrote:' $rlRun_LOG1 | cut -d ' ' -f 2 | tr '\n' ' ') ./"
     packages=()
-    rlIsFedora && {
+    if rlIsFedora; then
       V_old=1.0.4
       R_old=1.fc35
-    }
-    rlIsRHEL '>=8' || rlIsRHELLike '>=8' && {
-      V_old=1.0.2
-      R_old=6.el8
-    }
-    rlIsRHEL '>=9' || rlIsRHELLike '>=9' && {
+    elif rlIsRHEL '>=10' || rlIsRHELLike '>=10'; then
+      V_old=1.3.2
+      R_old=4.el10
+    elif rlIsRHEL '>=9' || rlIsRHELLike '>=9'; then
       V_old=1.0.3
       R_old=4.el9
       packages+=(
         fapolicyd-dnf-plugin-${V_old}-${R_old}.noarch
       )
-    }
-    rlIsRHEL '>=10' || rlIsRHELLike '>=10' && {
-      V_old=1.3.2
-      R_old=4.el10
-      packages+=(
-        fapolicyd-dnf-plugin-${V_old}-${R_old}.noarch
-      )
-    }
+    elif rlIsRHEL '>=8' || rlIsRHELLike '>=8'; then
+      V_old=1.0.2
+      R_old=6.el8
+    fi
+    
     packages+=(
       fapolicyd-${V_old}-${R_old}.$A
       #fapolicyd-debuginfo-${V_old}-${R_old}.$A
