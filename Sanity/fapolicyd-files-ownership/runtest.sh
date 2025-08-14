@@ -40,7 +40,7 @@ function checkFile() {
     GROUP=$3
     if "$MUSTEXIST" || [ -e "$FILEPATH" ]; then
         ls -ld $FILEPATH
-        rlRun "ls -ld $FILEPATH | grep -qE '$OWNER[ ]*$GROUP'"
+        rlRun "ls -ld $FILEPATH | grep -qE '$OWNER[ ]*$GROUP'" 0 "Check ownership of $FILEPATH ($OWNER:$GROUP)"
     fi
 }
 
@@ -48,7 +48,7 @@ rlJournalStart
 
     rlPhaseStartTest
         rlServiceStart fapolicyd
-        rlRun "systemctl status fapolicyd" 0 "Confirm that fapolicyd is running"
+        rlRun "rlServiceStatus fapolicyd" 0 "Confirm that fapolicyd is running"
 
         rlRun -s "id fapolicyd"
         PATTERN="[0-9]+\(fapolicyd\)"
