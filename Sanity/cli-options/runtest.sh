@@ -167,11 +167,7 @@ rlJournalStart && {
       rlRun "cp '$(rpm -qal | grep '\.pyc$' | head -n 1)' files/application_x-bytecode.python_.pyc"
       rlRun "cp '$(rpm -qal | grep '\.so$' | grep -v libc | grep -v pthread | head -n 1)' files/application_x-sharedlib_non-libc.so"
       rlRun "cp /bin/bash files/application_x-executable_bash"
-      if rlIsRHELLike '>=9.6' || rlIsCentOS '>8'; then
-        libc=$(rpm -ql glibc | grep -E '^(/usr)?/lib(64)?/libc\b.*\.so(\.[0-9]+)?$' | head -n1)
-      else
-        libc=$(rpm -ql glibc | grep -E '^/lib(64)?/libc\b.*\.so(\.[0-9]+)?$' | head -n1)
-      fi
+      libc=$(rpm -ql glibc | grep -E '^(/usr)?/lib(64)?/libc\b.*\.so(\.[0-9]+)?$' | head -n1)
       tcfChk "checking $libc for application/x-sharedlib" && {
         echo -n "file's output:      "; file --mime $libc
         echo -n "fapolicyd's output: "; fapolicyd-cli -t $libc | tee out
