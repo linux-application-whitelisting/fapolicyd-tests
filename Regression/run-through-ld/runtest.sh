@@ -29,6 +29,7 @@
 
 PACKAGE="fapolicyd"
 TEST_LS=/var/tmp/ls2
+CONF_FILE="/etc/fapolicyd/fapolicyd.conf"
 
 rlJournalStart
   rlPhaseStartSetup && {
@@ -45,6 +46,9 @@ rlJournalStart
     CleanupRegister 'rlRun "rlFileRestore"'
     rlRun "rlFileBackup --clean $TEST_LS"
     rlRun "cp /usr/bin/ls $TEST_LS"
+    # rlFileBackup $CONF_FILE
+    # rlRun "sed -i '/^watch_fs =/ { /overlayfs/! s/$/,overlayfs/ }' $CONF_FILE" 0 "Add overlayfs to config file"
+    rlRun "cat $CONF_FILE"
     CleanupRegister "rlRun 'fapServiceRestore'"
     rlRun "fapServiceStart"
   rlPhaseEnd; }

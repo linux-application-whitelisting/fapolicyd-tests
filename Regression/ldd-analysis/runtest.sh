@@ -28,6 +28,7 @@
 . /usr/share/beakerlib/beakerlib.sh
 
 PACKAGE="fapolicyd"
+CONF_FILE="/etc/fapolicyd/fapolicyd.conf"
 
 rlJournalStart
   rlPhaseStartSetup && {
@@ -37,6 +38,10 @@ rlJournalStart
     CleanupRegister "rlRun 'rm -r $TmpDir' 0 'Removing tmp directory'"
     CleanupRegister 'rlRun "popd"'
     rlRun "pushd $TmpDir"
+    # CleanupRegister 'rlRun "rlFileRestore"'
+    # rlRun "rlFileBackup $CONF_FILE"
+    # rlRun "sed -i '/^watch_fs =/ { /overlayfs/! s/$/,overlayfs/ }' $CONF_FILE" 0 "Add overlayfs to config file"
+    rlRun "cat $CONF_FILE"
     CleanupRegister "testUserCleanup"
     rlRun "testUserSetup"
     CleanupRegister 'rlRun "fapCleanup"'
