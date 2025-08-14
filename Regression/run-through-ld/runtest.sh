@@ -46,9 +46,8 @@ rlJournalStart
     CleanupRegister 'rlRun "rlFileRestore"'
     rlRun "rlFileBackup --clean $TEST_LS"
     rlRun "cp /usr/bin/ls $TEST_LS"
-    # rlFileBackup $CONF_FILE
-    # rlRun "sed -i '/^watch_fs =/ { /overlayfs/! s/$/,overlayfs/ }' $CONF_FILE" 0 "Add overlayfs to config file"
-    rlRun "cat $CONF_FILE"
+    rlFileBackup $CONF_FILE
+    rlRun "sed -i '/^watch_fs =/ { /overlay/! s/$/,overlay/ }' $CONF_FILE" 0 "Adjust watch_fs configuration for image mode support"
     CleanupRegister "rlRun 'fapServiceRestore'"
     rlRun "fapServiceStart"
   rlPhaseEnd; }
