@@ -28,6 +28,7 @@
 . /usr/share/beakerlib/beakerlib.sh
 
 PACKAGE="fapolicyd"
+CONF_FILE="/etc/fapolicyd/fapolicyd.conf"
 
 rlJournalStart
   rlPhaseStartSetup && {
@@ -37,6 +38,9 @@ rlJournalStart
     CleanupRegister "rlRun 'rm -r $TmpDir' 0 'Removing tmp directory'"
     CleanupRegister 'rlRun "popd"'
     rlRun "pushd $TmpDir"
+    CleanupRegister 'rlRun "rlFileRestore"'
+    rlRun "rlFileBackup $CONF_FILE"
+    rlRun "sed -i '/^watch_fs =/ { /overlay/! s/$/,overlay/ }' $CONF_FILE" 0 "Adjust watch_fs configuration for image mode support"
     CleanupRegister "testUserCleanup"
     rlRun "testUserSetup"
     CleanupRegister 'rlRun "fapCleanup"'
