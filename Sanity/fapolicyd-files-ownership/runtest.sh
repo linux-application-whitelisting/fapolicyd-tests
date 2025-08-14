@@ -68,7 +68,7 @@ rlJournalStart
         checkFile /var/log/fapolicyd-access.log fapolicyd fapolicyd
 
         # check /run files
-        checkFile -e /run/fapolicyd root fapolicyd
+        ( ! rlIsRHEL "<9.7" && ! rlIsRHEL "10.0" && ! rlIsFedora ) && checkFile -e /run/fapolicyd root fapolicyd
         checkFile -e /run/fapolicyd/fapolicyd.fifo root fapolicyd
 
         # check /usr files
