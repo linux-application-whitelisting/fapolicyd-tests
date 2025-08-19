@@ -53,9 +53,10 @@ rlJournalStart
     rlRun "fapServiceStart"
     rlRun "chmod -R a+rx $PWD"
   rlPhaseEnd
-
+  
   rlPhaseStartTest "support info message" && {
     rlRun "fapStart"
+    sleep 1
     rlRun "fapStop"
     rlRun -s "fapServiceOut"
     rlAssertGrep 'Rule number API supported yes' "$rlRun_LOG" -iq
