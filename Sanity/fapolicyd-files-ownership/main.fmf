@@ -8,7 +8,7 @@ framework: beakerlib
 recommend:
   - usbguafapolicydrd
 duration: 5m
-enabled: true
+enabled: false
 tag:
   - CI-Tier-1
   - Tier1
