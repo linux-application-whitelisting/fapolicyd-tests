@@ -2,6 +2,8 @@
 # vim: dict=/usr/share/beakerlib/dictionary.vim cpt=.,w,b,u,t,i,k
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
+#   runtest.sh of /fapolicyd-tests/Sanity/fapolicyd-files-ownership
+#   Description: Verify correct file ownership in both image mode and package mode.
 #   Author: Natália Bubáková <nbubakov@redhat.com>
 #
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

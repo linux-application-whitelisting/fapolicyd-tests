@@ -1,17 +1,21 @@
-summary: Verify correct file ownership
-description: Verifies if important fapolicyd files have correct ownership
+summary: Verify correct file ownership in both image mode and package mode.
+description:  |
+    Verifies if important fapolicyd files have correct ownership for testing in both image mode and package mode.
+    It is a sanity check to ensure the package is deployed with correct file ownership,
+    critical for daemon functionality and preventing issues like UID/GID drift in Image Mode or spec file bugs.
 contact: Natália Bubáková <nbubakov@redhat.com>
 component:
   - fapolicyd
 test: ./runtest.sh
 framework: beakerlib
-recommend:
-  - usbguafapolicydrd
+recommend+:
+  - fapolicyd
 duration: 5m
-enabled: false
+enabled: true
 tag:
   - CI-Tier-1
   - Tier1
+  - ImageMode
 tier: '1'
 adjust:
   - enabled: false
