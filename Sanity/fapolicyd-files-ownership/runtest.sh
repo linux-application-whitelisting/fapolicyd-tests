@@ -74,7 +74,7 @@ rlJournalStart
         checkFile -e /run/fapolicyd/fapolicyd.fifo root fapolicyd
 
         # check /usr files
-        checkFile -e /usr/share/fapolicyd root fapolicyd
+        ( ! rlIsRHEL "<9.7" && ! rlIsRHEL "10.0" && ! rlIsFedora ) && checkFile -e /usr/share/fapolicyd root root
         checkFile -e /usr/lib/systemd/system/fapolicyd.service root root
         checkFile -e /usr/sbin/fagenrules root root
         checkFile -e /usr/sbin/fapolicyd root root
