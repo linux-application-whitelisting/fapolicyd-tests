@@ -30,6 +30,7 @@
 . /usr/share/beakerlib/beakerlib.sh || exit 1
 
 TESTDIR=`pwd`
+PACKAGE="fapolicyd"
 
 function checkFile() {
     MUSTEXIST=false
