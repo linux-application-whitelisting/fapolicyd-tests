@@ -50,6 +50,17 @@ rlJournalStart && {
     CleanupRegister 'rlRun "popd"'
     rlRun "pushd $TmpDir"
     rlFileBackup "/etc/hosts"
+
+    IP_ADDRESS=`hostname -I | awk '{print $1}'`
+    DOMAIN_NAME="domain.com"
+    IPA_MACHINE_HOSTNAME="test`date +%s`.${DOMAIN_NAME}"
+    REALM_NAME="TESTREALM.COM"
+    DM_PASSWORD="Secret123"
+    MASTER_PASSWORD="Secret123"
+    ADMIN_PASSWORD="Secret123"
+
+    # Hardcoded temporary hostname as IPA server hostname must be shorter than 64 characters and contain valid domain name
+    rlRun "echo \"${IP_ADDRESS} ${IPA_MACHINE_HOSTNAME}\" | sudo tee -a /etc/hosts"
   rlPhaseEnd; }
 
   tcfTry "Tests" --no-assert && {
@@ -77,18 +88,6 @@ EOF"
       rlRun "fapStart" > /dev/null
       fapServiceOut -b -f
       CleanupRegister "kill $!"
-
-      IP_ADDRESS=`hostname -I | awk '{print $1}'`
-      DOMAIN_NAME="domain.com"
-      IPA_MACHINE_HOSTNAME="test`date +%s`.${DOMAIN_NAME}"
-      REALM_NAME="TESTREALM.COM"
-      DM_PASSWORD="Secret123"
-      MASTER_PASSWORD="Secret123"
-      ADMIN_PASSWORD="Secret123"
-
-      # Hardcoded temporary hostname as IPA server hostname must be shorter than 64 characters and contain valid domain name
-      rlRun "echo \"${IP_ADDRESS} ${IPA_MACHINE_HOSTNAME}\" | sudo tee -a /etc/hosts"
-
       CleanupRegister 'rlRun "ipa-server-install --uninstall --unattended"'
       if rlTestVersion "$(rpm -q ipa-server)" '<' "ipa-server-4.5"; then
         rlRun "ipa-server-install --hostname=$IPA_MACHINE_HOSTNAME -r $REALM_NAME -n $DOMAIN_NAME -p $DM_PASSWORD -P $MASTER_PASSWORD -a $ADMIN_PASSWORD --unattended --ip-address $IP_ADDRESS" 0
