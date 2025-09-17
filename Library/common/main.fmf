@@ -6,3 +6,4 @@ require:
 - gcc
 - policycoreutils
 - selinux-policy-devel
+- setools-console
