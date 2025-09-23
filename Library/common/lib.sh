@@ -70,28 +70,10 @@ fapSetup() {
   rlRun "rlFileBackup --namespace fap --clean /etc/fapolicyd/ /etc/systemd/system/fapolicyd.service.d"
   rlRun "rm -f /var/lib/fapolicyd/*"
   rlRun "setsebool daemons_use_tty on"
-  if [[ -z "$(sesearch -A -s init_t -t unconfined_t -c fifo_file -p write)" ]]; then
-    cat > mujfamodul.te <<EOF
-policy_module(mujfamodul,1.0)
-
-require {
-  type unconfined_t;
-  type init_t;
 }
-
-allow init_t unconfined_t : fifo_file { append getattr ioctl lock read write };
-EOF
-    rlRun "make -f /usr/share/selinux/devel/Makefile"
-    rlRun "semodule -i mujfamodul.pp"
-    __INTERNAL_fap_semodule=true
-  fi
-}
-
-__INTERNAL_fap_semodule=false
 
 fapCleanup() {
   fapStop
-  $__INTERNAL_fap_semodule && rlRun "semodule -r mujfamodul"
   rlRun 'rm -rf /var/lib/fapolicyd/*'
   [[ -f /etc/systemd/system/fapolicyd.service.d/10-debug-deny.conf ]] && {
     rm -f /etc/systemd/system/fapolicyd.service.d/10-debug-deny.conf
