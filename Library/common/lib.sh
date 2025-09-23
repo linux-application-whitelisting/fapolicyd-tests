@@ -265,10 +265,10 @@ install -m 755 fapTestProgram %{buildroot}${__INTERNAL_program_dir}/fapTestProgr
 %files
 ${__INTERNAL_program_dir}/fapTestProgram
 
+# Add a proper entry to fix the warning
 %changelog
-+ # Add a proper entry to fix the warning
-+ * Fri Jul 25 2025 X Y <test@example.com> - 1-1
-+ - Initial package creation
+* Fri Jul 25 2025 X Y <test@example.com> - 1-1
+- Initial package creation
 EOS
 }
 
