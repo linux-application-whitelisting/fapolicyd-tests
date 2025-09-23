@@ -265,6 +265,8 @@ install -m 755 fapTestProgram %{buildroot}${__INTERNAL_program_dir}/fapTestProgr
 %files
 ${__INTERNAL_program_dir}/fapTestProgram
 
+#scriptlet
+
 # Add a proper entry to fix the warning
 %changelog
 * Fri Jul 25 2025 X Y <test@example.com> - 1-1
