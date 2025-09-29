@@ -2,6 +2,8 @@
 # vim: dict=/usr/share/beakerlib/dictionary.vim cpt=.,w,b,u,t,i,k
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
+#   runtest.sh of /fapolicyd-tests/Sanity/fapolicyd-files-ownership
+#   Description: Verify correct file ownership in both image mode and package mode.
 #   Author: Natália Bubáková <nbubakov@redhat.com>
 #
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -28,6 +30,7 @@
 . /usr/share/beakerlib/beakerlib.sh || exit 1
 
 TESTDIR=`pwd`
+PACKAGE="fapolicyd"
 
 function checkFile() {
     MUSTEXIST=false
@@ -72,7 +75,7 @@ rlJournalStart
         checkFile -e /run/fapolicyd/fapolicyd.fifo root fapolicyd
 
         # check /usr files
-        checkFile -e /usr/share/fapolicyd root fapolicyd
+        ( ! rlIsRHEL "<9.7" && ! rlIsRHEL "10.0" && ! rlIsFedora ) && checkFile -e /usr/share/fapolicyd root root
         checkFile -e /usr/lib/systemd/system/fapolicyd.service root root
         checkFile -e /usr/sbin/fagenrules root root
         checkFile -e /usr/sbin/fapolicyd root root
