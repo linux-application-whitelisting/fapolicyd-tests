@@ -8,6 +8,9 @@ duration: 5m
 enabled: true
 environment:
     AVC_ERROR: +no_avc_check
+check:
+  - how: avc
+    result: xfail
 tag:
   - CI-Tier-1
   - Tier1
