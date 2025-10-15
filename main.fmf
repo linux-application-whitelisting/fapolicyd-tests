@@ -2,8 +2,8 @@ component:
   - fapolicyd
 require:
   - name: /Library/common
-    url: https://github.com/RedHat-SP-Security/fapolicyd-tests
-    ref: master
+    url: https://github.com/linux-application-whitelisting/fapolicyd-tests
+    ref: main
     type: library
   - fapolicyd
 recommend:
