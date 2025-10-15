@@ -2,7 +2,7 @@
 jobs:
   - job: tests
     trigger: pull_request
-    branch: master
+    branch: main
     targets:
       - fedora-rawhide
       - fedora-stable
@@ -15,4 +15,4 @@ jobs:
       environments:
         - tmt:
             context:
-              target_PR_branch: master
+              target_PR_branch: main
