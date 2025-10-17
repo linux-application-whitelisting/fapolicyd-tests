@@ -1,3 +1,31 @@
+# fapolicyd tests
+
+This repository contains a set of tests and plans for the fapolicyd component. Tests are written with the use of [beakerlib](https://github.com/beakerlib/beakerlib) and [TMT Metadata Specification](https://tmt.readthedocs.io/en/latest/spec.html).
+
+## Gating guidelines
+
+Tests are divided into tiers. The tiers then indicate a priority for our **gating process**.
+
+* **`tier: 1`**: Critical tests that must pass for any code merge.
+* **`tier: 2`**: Important but non-critical tests.
+* **`tier: 3`**: Non-critical tests.
+
+## Plans
+
+How to list existing test plans:
+```
+$ tmt plans
+Found 6 plans: /Plans/ci, /Plans/destructive-plan, /Plans/e2e_ci, /Plans/ima-integrity, /Plans/rpmverify and /update/plan.
+```
+
+## Usage
+
+How to run CI tests on localhost:
+```
+# tmt run provision -h local prepare plans -n /Plans/ci discover execute
+# tmt run -l report -h display -v
+```
+
 ## Test plan execution on the Testing Farm
 
 The procedure below is not a complete copy&paste solution, it's rather a guideline how test plans are currently executed.
