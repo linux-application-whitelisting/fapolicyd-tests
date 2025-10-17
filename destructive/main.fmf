@@ -12,7 +12,7 @@ extra-hardware: |
     hostrequire = disk>=40000
 require+:
   - name: /destructive/library
-    url: https://github.com/RedHat-SP-Security/fapolicyd-tests
+    url: https://github.com/linux-application-whitelisting/fapolicyd-tests
     type: library
     #path: ../tests
   - library(ControlFlow/Cleanup)
