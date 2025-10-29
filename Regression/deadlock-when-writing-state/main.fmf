@@ -1,0 +1,26 @@
+summary: test if fapolicyd deadlocks when writing its state file
+contact: Milos Malik <mmalik@redhat.com>
+test: ./runtest.sh
+duration: 5m
+enabled: true
+require:
+  - name: /Library/common
+    url: https://github.com/linux-application-whitelisting/fapolicyd-tests
+    ref: main
+    type: library
+  - fapolicyd
+  - fapolicyd-selinux
+recommend:
+tag:
+  - NoRHEL4
+  - NoRHEL5
+  - NoRHEL6
+  - NoRHEL7
+adjust+:
+  - enabled: false
+    when: distro == rhel-4, rhel-5, rhel-6, rhel-7
+    continue: false
+link:
+  - verifies: https://issues.redhat.com/browse/RHEL-120827
+  - verifies: https://issues.redhat.com/browse/RHEL-122158
+
