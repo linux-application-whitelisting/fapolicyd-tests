@@ -42,8 +42,11 @@ rlJournalStart && {
     rlRun "touch './test file'"
     fapStart
     CleanupRegister "rlRun 'fapolicyd-cli -f delete \"./test file\"'"
+
+    lastChange=$(fapDBChanged)
     rlRun "fapolicyd-cli -f add './test file'"
     rlRun "fapolicyd-cli --update"
+    rlRun "fapWaitForDBChange $lastChange" 0 "wait until fapolicyd updates the db"
     fapStop
     rlRun -s "fapolicyd-cli --dump-db | grep 'test file'"
     rlAssertGrep "test file" $rlRun_LOG

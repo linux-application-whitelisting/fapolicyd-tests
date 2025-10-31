@@ -54,15 +54,21 @@ rlJournalStart
       rlRun "fapStop"
       rlRun "fapolicyd-cli -D | grep $fapTestProgram" 1-255
       rlRun "fapStart"
+      lastChange=$(fapDBChanged)
       rlRun "$comm install -y ${fapTestPackage[0]}"
+      rlRun "fapWaitForDBChange $lastChange" 0 "wait until fapolicyd updates the db"
       rlRun "fapStop"
       rlRun "fapolicyd-cli -D | grep $fapTestProgram"
       rlRun "fapStart"
+      lastChange=$(fapDBChanged)
       rlRun "$comm install -y ${fapTestPackage[1]}"
+      rlRun "fapWaitForDBChange $lastChange" 0 "wait until fapolicyd updates the db"
       rlRun "fapStop"
       rlRun "fapolicyd-cli -D | grep $fapTestProgram"
       rlRun "fapStart"
+      lastChange=$(fapDBChanged)
       CleanupDo --mark
+      rlRun "fapWaitForDBChange $lastChange" 0 "wait until fapolicyd updates the db"
       rlRun "fapStop"
       rlRun "fapolicyd-cli -D | grep $fapTestProgram" 1-255
       rlRun "fapStart"
@@ -74,15 +80,21 @@ rlJournalStart
     rlRun "fapStop"
     rlRun "fapolicyd-cli -D | grep $fapTestProgram" 1-255
     rlRun "fapStart"
+    lastChange=$(fapDBChanged)
     rlRun "rpm -ivh ${fapTestPackage[0]}"
+    rlRun "fapWaitForDBChange $lastChange" 0 "wait until fapolicyd updates the db"
     rlRun "fapStop"
     rlRun "fapolicyd-cli -D | grep $fapTestProgram"
     rlRun "fapStart"
+    lastChange=$(fapDBChanged)
     rlRun "rpm -Uvh ${fapTestPackage[1]}"
+    rlRun "fapWaitForDBChange $lastChange" 0 "wait until fapolicyd updates the db"
     rlRun "fapStop"
     rlRun "fapolicyd-cli -D | grep $fapTestProgram"
     rlRun "fapStart"
+    lastChange=$(fapDBChanged)
     CleanupDo --mark
+    rlRun "fapWaitForDBChange $lastChange" 0 "wait until fapolicyd updates the db"
     rlRun "fapStop"
     rlRun "fapolicyd-cli -D | grep $fapTestProgram" 1-255
     rlRun "fapStart"

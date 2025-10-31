@@ -52,9 +52,11 @@ rlJournalStart && {
       rlRun "fapStart"
       CleanupRegister 'rlRun "fapolicyd-cli -f delete ./test_file1 --trust-file trust_file1" 0-255'
       CleanupRegister 'rlRun "fapolicyd-cli -f delete ./test_file2 --trust-file trust_file2" 0-255'
+      lastChange=$(fapDBChanged)
       rlRun "fapolicyd-cli -f add ./test_file1 --trust-file trust_file1"
       rlRun "fapolicyd-cli -f add ./test_file2 --trust-file trust_file2"
       rlRun "fapolicyd-cli --update"
+      rlRun "fapWaitForDBChange $lastChange" 0 "wait until fapolicyd updates the db"
       rlRun "fapStop"
       rlRun -s "fapolicyd-cli -D | grep test_file"
       rlAssertGrep 'test_file1' $rlRun_LOG
