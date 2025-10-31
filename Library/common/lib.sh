@@ -319,6 +319,48 @@ fapLibraryLoaded() {
     fi
 }
 
+true <<'=cut'
+=pod
+
+=head2 fapDBChanged
+
+Get the modification timestamp of the fapolicyd database.
+
+=cut
+
+fapDBChanged() {
+    stat -c %Y /var/lib/fapolicyd/data.mdb
+}
+
+true <<'=cut'
+=pod
+
+=head2 fapWaitForDBChange
+
+Wait for the fapolicyd database to change from a given timestamp.
+
+After 10 seconds timeout returns 1.
+
+=over
+
+=item $1 - The previous database timestamp to compare against
+
+=back
+
+Returns: 0 if the database changed within the timeout period, 1 otherwise.
+
+=cut
+
+fapWaitForDBChange() {
+    for _ in `seq 0 9`; do
+        if [ "$1" != "$(fapDBChanged)" ]; then
+            return 0
+        fi
+        sleep 1
+    done
+    return 1
+}
+
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #   Authors
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
