@@ -4,6 +4,7 @@ test: ./runtest.sh
 duration: 5m
 enabled: true
 recommend+:
+  - audit
   - samba-winbind
 tag:
   - Tier3
