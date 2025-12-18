@@ -20,6 +20,9 @@ adjust+:
   - enabled: false
     when: distro == rhel-4, rhel-5, rhel-6, rhel-7
     continue: false
+  - enabled: false
+    when: distro < rhel-10.2, rhel-9.8
+    continue: false
 link:
   - verifies: https://issues.redhat.com/browse/RHEL-120827
   - verifies: https://issues.redhat.com/browse/RHEL-122158
