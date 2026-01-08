@@ -6,7 +6,7 @@ component:
 test: ./runtest.sh
 framework: beakerlib
 recommend:
-  - usbguafapolicydrd
+  - fapolicyd
 duration: 5m
 enabled: false
 tag:
