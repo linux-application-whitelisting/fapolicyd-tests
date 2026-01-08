@@ -4,14 +4,15 @@ jobs:
     trigger: pull_request
     branch: main
     targets:
+      - centos-stream-9
+      - centos-stream-10
       - fedora-rawhide
       - fedora-stable
-      - centos-stream-10-x86_64
     skip_build: true
     tf_extra_params:
       test:
         tmt:
-          name: "/Plans/ci"
+          name: "/Plans/ci-tests"
       environments:
         - tmt:
             context:
