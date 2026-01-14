@@ -56,7 +56,7 @@ rlJournalStart
         rlRun "test -S ./${TEST_DIR}/socket && test -p ./${TEST_DIR}/pipe" 0 "Verify non-regular files exist"
 
         CleanupRegister "rlRun 'fapolicyd-cli -f delete ./${TEST_DIR}' 0-255"
-        rlRun -s "fapolicyd-cli -f add ./${TEST_DIR}" 1 "Add a directory with non-regular files to trust database"
+        rlRun -s "fapolicyd-cli -f add ./${TEST_DIR}" 1,9 "Add a directory with non-regular files to trust database"
         rlAssertNotGrep "Segmentation fault[[:space:]]+\(core dumped\)" $rlRun_LOG -E
         rlRun "fapolicyd-cli --dump-db | grep ${TmpDir}/${TEST_DIR}" 1 "Verify that the directory is not in trust database"
     rlPhaseEnd

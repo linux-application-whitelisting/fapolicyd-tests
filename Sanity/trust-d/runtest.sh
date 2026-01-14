@@ -76,7 +76,7 @@ rlJournalStart && {
       CleanupRegister --mark 'rlRun "fapStop"'
       CleanupRegister 'rlRun "fapolicyd-cli -f delete ./test_file1 --trust-file trust_file1" 0-255'
       rlRun "fapolicyd-cli -f add ./test_file1 --trust-file trust_file1"
-      rlRun "fapolicyd-cli -f add ./test_file1 --trust-file trust_file2" 1 "cannot add a duplicate"
+      rlRun "fapolicyd-cli -f add ./test_file1 --trust-file trust_file2" 1,9 "cannot add a duplicate"
       CleanupDo --mark
     rlPhaseEnd; }
 
