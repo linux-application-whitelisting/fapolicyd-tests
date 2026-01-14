@@ -36,6 +36,7 @@ rlJournalStart
     rlPhaseStartSetup
         rlRun "rlImport --all" 0 "Import libraries" || rlDie "cannot continue"
         rlRun "TmpDir=$(mktemp -d)" 0 'Creating tmp directory'
+        TIMESTAMP=`LC_ALL=en_US.UTF-8 date "+%x %T"`
         rlRun "pushd $TmpDir"
         rlFileBackup /etc/nsswitch.conf /etc/pam.d
         rlRun "set -o pipefail"
@@ -47,7 +48,7 @@ rlJournalStart
         rlRun "grep -E '^(passwd|group):[[:space:]]*winbind' /etc/nsswitch.conf" 0 "Check winbind is the first in order"
         rlRun "systemctl start winbind"
         rlRun "systemctl restart fapolicyd"
-        rlRun -s "ausearch -m AVC -c fapolicyd -i" 1 "Check there is no match for fapolicyd AVCs"
+        rlRun -s "ausearch -m AVC -c fapolicyd -i -ts $TIMESTAMP" 1 "Check if there are no fapolicyd AVCs"
         rlAssertGrep "<no matches>" $rlRun_LOG
         rlAssertNotGrep "type=AVC.*denied.*comm=fapolicyd.*path=/run/samba/winbindd/pipe.*" $rlRun_LOG
     rlPhaseEnd
@@ -62,3 +63,4 @@ rlJournalStart
     rlPhaseEnd
     rlJournalPrintText
 rlJournalEnd
+
