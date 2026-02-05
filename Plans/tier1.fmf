@@ -1,0 +1,9 @@
+summary: test plan for running Tier1 tests
+
+discover:
+  - name: Upstream_tests_fapolicyd
+    how: fmf
+    filter: 'tag:Tier1 | tier:1'
+
+execute:
+    how: tmt

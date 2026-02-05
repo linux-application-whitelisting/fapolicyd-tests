@@ -1,0 +1,9 @@
+summary: test plan for running Tier3 tests
+
+discover:
+  - name: Upstream_tests_fapolicyd
+    how: fmf
+    filter: 'tag:Tier3 | tier:3'
+
+execute:
+    how: tmt

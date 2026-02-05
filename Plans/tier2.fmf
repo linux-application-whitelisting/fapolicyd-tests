@@ -1,0 +1,9 @@
+summary: test plan for running Tier2 tests
+
+discover:
+  - name: Upstream_tests_fapolicyd
+    how: fmf
+    filter: 'tag:Tier2 | tier:2'
+
+execute:
+    how: tmt
