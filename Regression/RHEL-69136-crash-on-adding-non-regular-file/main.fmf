@@ -14,6 +14,6 @@ adjust+:
   - enabled: false
     when: distro < rhel-9.7
     continue: false
-links:
+link:
   - verifies: https://issues.redhat.com/browse/RHEL-69136
 id: e2c6b00f-cba4-4376-8c8b-651f97fd1e04

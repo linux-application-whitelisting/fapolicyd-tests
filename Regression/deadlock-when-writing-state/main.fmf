@@ -11,6 +11,7 @@ require:
   - fapolicyd
   - fapolicyd-selinux
 recommend:
+  - iproute
 tag:
   - NoRHEL4
   - NoRHEL5
