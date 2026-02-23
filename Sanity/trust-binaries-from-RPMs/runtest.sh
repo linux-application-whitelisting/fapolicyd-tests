@@ -35,6 +35,7 @@ rlJournalStart
         rlAssertRpm environment-modules
         rlAssertExists /usr/share/Modules/bin/mkroot
         rlServiceStart fapolicyd
+        sleep 1
         rlRun "fapolicyd-cli --check-status"
     rlPhaseEnd
 

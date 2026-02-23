@@ -26,7 +26,7 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # Include Beaker environment
-. /usr/share/beakerlib/beakerlib.sh
+. /usr/share/beakerlib/beakerlib.sh || exit 1
 
 PACKAGE="fapolicyd"
 

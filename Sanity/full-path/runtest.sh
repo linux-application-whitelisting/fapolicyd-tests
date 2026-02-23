@@ -44,6 +44,7 @@ rlJournalStart && {
     CleanupRegister "rlRun 'fapolicyd-cli -f delete ./test_file'"
     rlRun "fapolicyd-cli -f add ./test_file"
     rlRun "fapolicyd-cli --update"
+    rlRun "fapolicyd-cli --check-status"
     fapStop
     rlRun -s "fapolicyd-cli --dump-db | grep test_file"
     rlAssertGrep "$(realpath ./test_file)" $rlRun_LOG
