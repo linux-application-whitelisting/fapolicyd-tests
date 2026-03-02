@@ -1,0 +1,23 @@
+summary: test if fapolicyd trusts files brought by various packages
+contact: Milos Malik <mmalik@redhat.com>
+test: ./runtest.sh
+duration: 5m
+enabled: true
+require:
+  - fapolicyd
+  - fapolicyd-selinux
+  - selinux-policy
+  - selinux-policy-targeted
+  - redhat-rpm-config
+tag:
+  - Tier3
+tier: 3
+adjust+:
+  - enabled: false
+    when: distro == rhel-4, rhel-5, rhel-6, rhel-7
+    continue: false
+link:
+  - verifies: https://issues.redhat.com/browse/RHEL-94661
+  - verifies: https://issues.redhat.com/browse/RHEL-94786
+extra-nitrate: TC#0619988
+id: 4d20f4ec-8f96-418f-af84-f933429229ef
