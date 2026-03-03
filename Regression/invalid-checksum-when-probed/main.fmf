@@ -1,0 +1,33 @@
+summary: test if fapolicyd computes valid checksum of probed file
+contact: Milos Malik <mmalik@redhat.com>
+test: ./runtest.sh
+duration: 10m
+enabled: true
+require:
+  - fapolicyd
+  - fapolicyd-selinux
+  - kernel-devel
+  - systemtap-server
+  - systemtap-runtime
+  - yum-utils
+recommend:
+  - bash-debuginfo
+  - bash-debugsource
+tag:
+  - Tier2
+tier: 2
+link:
+  - verifies: https://issues.redhat.com/browse/RHEL-142948
+  - verifies: https://issues.redhat.com/browse/RHEL-144373
+adjust+:
+  - enabled: false
+    when: distro == rhel-4, rhel-5, rhel-6, rhel-7, rhel-8
+    because: the test is not relevant there
+  - enabled: false
+    when: distro < rhel-9.8
+    because: the bug is not yet fixed there
+  - enabled: false
+    when: distro < rhel-10.2
+    because: the bug is not yet fixed there
+extra-nitrate: TC#0619987
+id: c43e78e3-a7b5-4c18-b48d-974dd80dfbed
