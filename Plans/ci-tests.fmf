@@ -1,9 +1,11 @@
 summary: CI test plan that runs only modified tests
 discover:
     how: fmf
-    modified-only: true
-    modified-url: https://github.com/linux-application-whitelisting/fapolicyd-tests
-    modified-ref: main
+#    modified-only: true
+#    modified-url: https://github.com/linux-application-whitelisting/fapolicyd-tests
+#    modified-ref: main
+    test:
+      - /Stress/effect-on-source-RPM-rebuild
 execute:
     how: tmt
 
