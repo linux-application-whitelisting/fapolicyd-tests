@@ -1,4 +1,7 @@
 summary: CI test plan that runs only modified tests
+prepare:
+    how: shell
+    script: echo '%_pkgverify_level digest' > /etc/rpm/macros.verify
 discover:
     how: fmf
     modified-only: true
