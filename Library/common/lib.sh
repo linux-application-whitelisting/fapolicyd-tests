@@ -213,6 +213,7 @@ fapServiceRestore() {
 
 fapPrepareTestPackageContent() {
   rlRun "rm -rf ~/rpmbuild"
+  rlRun "fapEnableAutomaticRpmSigning"
   rlRun "rpmdev-setuptree"
   cat > ~/rpmbuild/SOURCES/fapTestProgram.c << 'EOF'
 #include <stdio.h>
@@ -359,6 +360,39 @@ fapWaitForDBChange() {
         sleep 1
     done
     return 1
+}
+
+true <<'=cut'
+=pod
+
+=head2 fapEnableAutomaticRpmSigning
+
+Set up automatic signing from rpmbuild(1)
+https://fedoraproject.org/wiki/Changes/Enforcing_signature_checking_by_default
+https://rpm.org/docs/6.0.x/man/rpm-setup-autosign.1
+
+=over
+
+=back
+
+Returns: 0 on success, 1 on failure.
+
+=cut
+
+fapEnableAutomaticRpmSigning() {
+    if [ ! -x /usr/lib/rpm/rpm-setup-autosign ]; then
+        rlLogDebug "rpm-setup-autosign is not installed"
+        return 0
+    fi
+    rpmhome=$(rpm --eval "%{xdg:config}/rpm")
+    mkdir -p ${rpmhome}
+    rlRun "/usr/lib/rpm/rpm-setup-autosign" 0,1
+    autosign_id=$(rpm --eval %_openpgp_autosign_id)
+    if [ "$autosign_id" = '%_openpgp_autosign_id' ]; then
+        rlLogDebug "could not initialize autosign id"
+        return 1
+    fi
+    rlRun "rpmkeys --import ${rpmhome}/${autosign_id}.asc"
 }
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

@@ -79,6 +79,7 @@ install -m 755 myscript.sh %{buildroot}/usr/bin/myscript.sh
 # let's skip this for now
 EOS
 
+    rlRun "fapEnableAutomaticRpmSigning"
     rlRun "rpmdev-setuptree"
     rlRun "rpmbuild -ba myscript.spec"
     CleanupRegister 'rpm -e myscript'
