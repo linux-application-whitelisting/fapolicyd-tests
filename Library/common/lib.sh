@@ -25,7 +25,7 @@
 #
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #   library-prefix = fap
-#   library-version = 27
+#   library-version = 28
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 true <<'=cut'
@@ -70,6 +70,12 @@ fapSetup() {
   rlRun "rlFileBackup --namespace fap --clean /etc/fapolicyd/ /etc/systemd/system/fapolicyd.service.d"
   rlRun "rm -f /var/lib/fapolicyd/*"
   rlRun "setsebool daemons_use_tty on"
+  # enable persistent journal necessary when there are a lot of DEBUG messages
+  if [ ! -d /var/log/journal ]; then
+      rlRun "mkdir /var/log/journal"
+      rlRun "journalctl --flush"
+      _SWITCH_BACK_TO_VOLATILE=1
+  fi
 }
 
 fapCleanup() {
@@ -83,6 +89,11 @@ fapCleanup() {
   rlRun "setsebool daemons_use_tty off"
   rlRun "rlFileRestore --namespace fap"
   rlRun "rlServiceRestore fapolicyd"
+  if [ -n "$_SWITCH_BACK_TO_VOLATILE" ]; then
+    rlRun "rm -rf /var/log/journal"
+    rlRun "systemctl restart systemd-journald"
+    unset _SWITCH_BACK_TO_VOLATILE
+  fi
 }
 
 fapServiceOut() {
@@ -159,6 +170,7 @@ Type=simple
 Restart=no
 ExecStart=
 ExecStart=${fapolicyd_path}fapolicyd $FAPOPTS
+LogRateLimitIntervalSec=0
 EOF
       SYSTEMD_RELOAD=1
     }
