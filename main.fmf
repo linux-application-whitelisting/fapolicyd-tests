@@ -2,9 +2,8 @@ component:
   - fapolicyd
 require:
   - name: /Library/common
-    url: https://github.com/linux-application-whitelisting/fapolicyd-tests
-    ref: main
     type: library
+    nick: fapolicyd/common
   - fapolicyd
 recommend:
   - fapolicyd-selinux
