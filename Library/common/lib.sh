@@ -126,7 +126,7 @@ fapResetServiceOutTimestamp() {
 }
 
 fapStart() {
-  local res fapolicyd_path tail_pid FAPOPTS SYSTEMD_RELOAD Timeout
+  local res fapolicyd_path FAPOPTS SYSTEMD_RELOAD Timeout
   res=0
   FAPOPTS='--debug-deny'
   Timeout=120
@@ -183,11 +183,8 @@ EOF
   fapResetServiceOutTimestamp
   rlServiceStart fapolicyd || let res++
 
-  fapServiceOut -b -f
-  tail_pid=$!
-
   local t=$(($(date +%s) + $Timeout))
-  while ! fapServiceOut | grep -q 'Starting to listen for events' \
+  while ! fapServiceOut --grep='Starting to listen for events' > /dev/null 2>&1 \
         && systemctl status fapolicyd > /dev/null; do
     sleep 1
     echo -n . >&2
@@ -196,10 +193,11 @@ EOF
       break
     }
   done
-  disown $tail_pid
-  kill $tail_pid
   echo
-  systemctl status fapolicyd > /dev/null || let res++
+  if ! systemctl status fapolicyd > /dev/null; then
+    let res++
+    fapServiceOut
+  fi
   return $res
 }
 
