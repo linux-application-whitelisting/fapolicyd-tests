@@ -4,13 +4,17 @@ test: ./runtest.sh
 duration: 60m
 enabled: true
 require+:
+  - name: /Library/common
+    type: library
+    nick: fapolicyd/common
   - library(distribution/tcf)
   - library(ControlFlow/Cleanup)
   - library(rpm/snapshot)
   - createrepo_c
   - /usr/bin/yum-builddep
 recommend:
-  - rpmbuild
+  - /usr/bin/rpmbuild
+  - rpmdevtools
   - file-devel
   - lmdb-devel
 tag:
