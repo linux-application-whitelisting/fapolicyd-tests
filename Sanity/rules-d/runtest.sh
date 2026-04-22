@@ -28,13 +28,106 @@
 . /usr/bin/rhts-environment.sh || :
 . /usr/share/beakerlib/beakerlib.sh || exit 1
 
+# EL supplemental repos for dnf builddep (Fedora: no-op). Repolist via rlRun -s (BeakerLib); grep
+# for branching only — rlAssertGrep would fail the phase when repos are absent before enablement.
+enable_el_builder_repos() {
+  if rlIsFedora; then
+    rlLogInfo "Fedora: skipping CodeReady / CRB / PowerTools (not used for build deps)"
+    return 0
+  fi
+  rlRun -s "dnf repolist enabled" 0 "List enabled DNF repositories"
+  if grep -Eiq 'rhel-CRB|codeready-builder|^[[:space:]]*crb[[:space:]]|powertools|PowerTools' "$rlRun_LOG"; then
+    rlLogInfo "CodeReady Builder / CRB / PowerTools already enabled"
+    return 0
+  fi
+  local _maj=0 _arch
+  _arch=$(uname -m)
+  [[ -r /etc/os-release ]] && . /etc/os-release && _maj=${VERSION_ID%%.*}
+  if (( _maj >= 9 )); then
+    rlRun "dnf config-manager --set-enabled crb" 0-255 "Enable crb" || true
+  elif (( _maj >= 8 )); then
+    rlRun "dnf config-manager --set-enabled powertools" 0-255 "Enable powertools" || true
+    rlRun "dnf config-manager --set-enabled PowerTools" 0-255 "Enable PowerTools" || true
+  fi
+  if (( _maj >= 8 )) && command -v subscription-manager &>/dev/null && subscription-manager identity &>/dev/null; then
+    rlRun "subscription-manager repos --enable codeready-builder-for-rhel-${_maj}-${_arch}-rpms" 0-255 "Enable CodeReady Builder (RHSM)" || true
+  fi
+}
+
+fapolicyd_spec_inject_rules_test_sed() {
+  local spec="$HOME/rpmbuild/SPECS/fapolicyd.spec"
+  [[ -f $spec ]] || {
+    rlLogError "missing $spec"
+    return 1
+  }
+
+  # Inject a sed command right before the %build section begins
+  if ! grep -q 'sed -i.*allow perm=any' "$spec"; then
+    awk '
+    /^%build[[:space:]]*$/ && !done {
+      print "sed -i \"s/allow perm=open all : all/allow perm=any all : all/g\" rules.d/95-allow-open.rules"
+      print ""
+      done=1
+    }
+    { print }
+    ' "$spec" > "${spec}.tmp" && mv -f "${spec}.tmp" "$spec" || return 1
+  fi
+}
+
+# Set V_old / R_old to the newest repo build that is still older than installed.
+rules_d_resolve_older_fapolicyd_nvr() {
+  local inst_epoch inst_evr e v r nvr_line cand_evr best_evr best_v best_r
+  inst_epoch=$(rpm -q --qf '%{EPOCHNUM}' fapolicyd) || return 1
+  inst_evr="${inst_epoch}:${V}-${R}"
+
+  rlRun -s "dnf -q repoquery --enablerepo='*' --available --latest-limit=1 --qf '%{epoch} %{version} %{release}' \"fapolicyd < ${inst_evr}\"" 0-255 "Resolve latest older fapolicyd NVR"
+  nvr_line=$(awk 'NF == 3 && ($1 ~ /^[0-9]+$/ || $1 == "(none)") { print; exit }' "$rlRun_LOG")
+  if [[ -n $nvr_line ]]; then
+    IFS=' ' read -r e V_old R_old <<<"$nvr_line"
+    [[ -z ${e:-} || $e == '(none)' ]] && e=0
+    cand_evr="${e}:${V_old}-${R_old}"
+    rlTestVersion "$cand_evr" "<" "$inst_evr" || {
+      rlLogError "resolved candidate ${V_old}-${R_old} is not older than installed ${V}-${R}"
+      return 1
+    }
+    rlLogInfo "Older fapolicyd for upgrade tests: ${V_old}-${R_old} (installed ${V}-${R})"
+    return 0
+  fi
+
+  rlLogWarning "Filtered repoquery returned no parsable result, trying full-list fallback"
+  rlRun -s "dnf -q repoquery --enablerepo='*' --available --qf '%{epoch} %{version} %{release}\\n' fapolicyd" 0 "List available fapolicyd versions"
+  best_evr=""
+  best_v=""
+  best_r=""
+  while read -r e v r; do
+    [[ -n ${v:-} && -n ${r:-} ]] || continue
+    [[ -z ${e:-} || $e == '(none)' ]] && e=0
+    [[ $e =~ ^[0-9]+$ ]] || continue
+    cand_evr="${e}:${v}-${r}"
+    rlTestVersion "$cand_evr" "<" "$inst_evr" || continue
+    if [[ -z $best_evr ]] || rlTestVersion "$cand_evr" ">" "$best_evr"; then
+      best_evr="$cand_evr"
+      best_v="$v"
+      best_r="$r"
+    fi
+  done < <(awk 'NF == 3 && ($1 ~ /^[0-9]+$/ || $1 == "(none)")' "$rlRun_LOG" | sort -u)
+
+  if [[ -z $best_evr ]]; then
+    rlLogError "no fapolicyd in repos older than installed ${V}-${R} (EVR ${inst_evr})"
+    rlLogInfo "Available versions in repo: $(tr '\n' '|' < "$rlRun_LOG")"
+    return 1
+  fi
+  V_old="$best_v"
+  R_old="$best_r"
+  rlLogInfo "Older fapolicyd for upgrade tests (fallback): ${V_old}-${R_old} (installed ${V}-${R})"
+}
+
 PACKAGE="fapolicyd"
 rlJournalStart && {
   rlPhaseStartSetup && {
     rlRun "rlImport --all" 0 "Import libraries" || rlDie "cannot continue"
-    tcfRun "rlCheckMakefileRequires" || rlDie "cannot continue"
-    rlRun "dnf repolist enabled | grep rhel-CRB" 0 "Check if required rhel-CRB repo is enabled" || rlDie "cannot continue"
-    # || "dnf config-manager --set-enabled rhel-CRB"
+    #tcfRun "rlCheckMakefileRequires" || rlDie "cannot continue"
+    enable_el_builder_repos
     IFS=' ' read -r SRC N V R A < <(rpm -q --qf '%{sourcerpm} %{name} %{version} %{release} %{arch}\n' fapolicyd)
     rlRun "TmpDir=\$(mktemp -d)" 0 "Creating tmp directory"
     CleanupRegister "rlRun 'rm -r $TmpDir' 0 'Removing tmp directory'"
@@ -46,53 +139,33 @@ rlJournalStart && {
     rlRun "fapSetup"
     CleanupRegister --mark "rlRun 'RpmSnapshotRevert'; rlRun 'RpmSnapshotDiscard'"
     rlRun "RpmSnapshotCreate"
-    rlRun "rlFetchSrcForInstalled fapolicyd"
-    rlRun "rpm -ivh ./fapolicyd*.src.rpm"
-    rlRun "yum-builddep -y ~/rpmbuild/SPECS/fapolicyd.spec"
+    if ! rlFetchSrcForInstalled fapolicyd; then
+      rlLogWarning "Installed SRPM not available, trying latest available source package"
+      rlRun -s "dnf -q repoquery --enablerepo='*-source' --arch=src --latest-limit=1 --location fapolicyd" 0 "Fallback: locate latest fapolicyd SRPM URL"
+      SRPM_URL=$(awk 'NF {print; exit}' "$rlRun_LOG")
+      [[ -n ${SRPM_URL:-} ]] || rlDie "Fallback did not return any SRPM URL for fapolicyd"
+      rlRun "curl -fL -O \"$SRPM_URL\"" 0 "Fallback: download latest fapolicyd SRPM"
+    fi
+    shopt -s nullglob
+    src_rpms=(./fapolicyd*.src.rpm)
+    shopt -u nullglob
+    (( ${#src_rpms[@]} > 0 )) || rlDie "No fapolicyd SRPM downloaded"
+    SRPM="${src_rpms[0]}"
+    rlRun "dnf builddep -y --enablerepo='*' \"$SRPM\"" 0 "Build deps from SRPM (all repos)"
+    rlRun "rpm -ivh \"$SRPM\""
     R2=".$(echo "$R" | cut -d . -f 2-)"
     rlRun -s "rpmbuild -bb -D 'dist ${R2}_98' ~/rpmbuild/SPECS/fapolicyd.spec" 0 "build newer package"
     rlRun_LOG1=$rlRun_LOG
-    rlRun "(cd ~/rpmbuild/SPECS/; patch -p0)" << 'EOF'
---- fapolicyd.spec      2022-01-26 09:04:22.000000000 -0500
-+++ fapolicyd.spec  2022-02-08 13:42:23.601603383 -0500
-@@ -37,1 +37,2 @@
-+Patch99: rules.patch
- %description
-@@ -89,1 +89,2 @@
-+%patch99 -p1 -b .rules
- %build
-EOF
-    cat > ~/rpmbuild/SOURCES/rules.patch << 'EOF'
-diff --git a/rules.d/95-allow-open.rules b/rules.d/95-allow-open.rules
-index c0ab31c..9103e12 100644
---- a/rules.d/95-allow-open.rules
-+++ b/rules.d/95-allow-open.rules
-@@ -1,1 +1,1 @@
--allow perm=open all : all
-+allow perm=any all : all
-EOF
+    rlRun "fapolicyd_spec_inject_rules_test_sed" 0 "Inject rules test sed into fapolicyd.spec"
     rlRun -s "rpmbuild -bb -D 'dist ${R2}_99' ~/rpmbuild/SPECS/fapolicyd.spec" 0 "build newer package with updated default rules"
     rlRun "mkdir rpms"
     pushd rpms
     rlRun "cp $(grep 'Wrote:' $rlRun_LOG | cut -d ' ' -f 2 | tr '\n' ' ') $(grep 'Wrote:' $rlRun_LOG1 | cut -d ' ' -f 2 | tr '\n' ' ') ./"
     packages=()
-    if rlIsFedora; then
-      V_old=1.0.4
-      R_old=1.fc35
-    elif rlIsRHEL '>=10' || rlIsRHELLike '>=10'; then
-      V_old=1.3.2
-      R_old=4.el10
-    elif rlIsRHEL '>=9' || rlIsRHELLike '>=9'; then
-      V_old=1.0.3
-      R_old=4.el9
-      packages+=(
-        fapolicyd-dnf-plugin-${V_old}-${R_old}.noarch
-      )
-    elif rlIsRHEL '>=8' || rlIsRHELLike '>=8'; then
-      V_old=1.0.2
-      R_old=6.el8
+    rules_d_resolve_older_fapolicyd_nvr || rlDie "cannot resolve older fapolicyd NVR from repos"
+    if [[ -n $(dnf repoquery --enablerepo='*' --available -q "fapolicyd-dnf-plugin = ${V_old}-${R_old}" 2>/dev/null) ]]; then
+      packages+=(fapolicyd-dnf-plugin-${V_old}-${R_old}.noarch)
     fi
-    
     packages+=(
       fapolicyd-${V_old}-${R_old}.$A
       #fapolicyd-debuginfo-${V_old}-${R_old}.$A
@@ -108,12 +181,10 @@ EOF
     _98=$( cat $rlRun_LOG | grep -o 'fapolicyd-[0-9].*_98.*\.rpm' | sed -r 's/\.rpm//' )
     _99=$( cat $rlRun_LOG | grep -o 'fapolicyd-[0-9].*_99.*\.rpm' | sed -r 's/\.rpm//' )
     popd
-    which dnf &>/dev/null && _dnfc=dnf\ || _dnfc=yum-
-    rlRun "${_dnfc}config-manager --add-repo file://$PWD/rpms"
-    repofile=$(grep -l "file://$PWD/rpms" /etc/yum.repos.d/*.repo)
+    repofile="/etc/yum.repos.d/rules-d-local.repo"
+    rlRun "printf '%s\n' '[rules-d-local]' 'name=rules-d-local' 'baseurl=file://$PWD/rpms' 'enabled=1' 'gpgcheck=0' 'skip_if_unavailable=1' 'sslverify=0' > $repofile"
     CleanupRegister "rlRun 'rm -f $repofile'"
-    rlRun "yum clean all"
-    rlRun "echo -e 'sslverify=0\ngpgcheck=0\nskip_if_unavailable=1' >> $repofile"
+    rlRun "dnf clean all"
     rlRun "repoquery -a | grep fapolicyd" 0-255
   rlPhaseEnd; }
 
@@ -122,8 +193,8 @@ EOF
       # fapolicyd.rules should not exit
       # rules.d should be populated
       rlRun "rm -rf /etc/fapolicyd"
-      rlRun "yum remove fapolicyd -y"
-      rlRun "yum install fapolicyd-$V-$R -y --allowerasing"
+      rlRun "dnf remove fapolicyd -y"
+      rlRun "dnf install fapolicyd-$V-$R -y --allowerasing"
       rlRun "ls -la /etc/fapolicyd/"
       rlRun "ls -la /etc/fapolicyd/rules.d/"
       rlAssertNotExists /etc/fapolicyd/fapolicyd.rules
@@ -146,7 +217,7 @@ EOF
       # fapolicyd service does not start if both fapolicyd.rules
       # and populated rules.d exist
       rlRun "rm -rf /etc/fapolicyd"
-      rlRun "yum reinstall fapolicyd-$V-$R -y"
+      rlRun "dnf reinstall fapolicyd-$V-$R -y"
       rlRun "ls -la /etc/fapolicyd/"
       rlRun "ls -la /etc/fapolicyd/rules.d/"
       rlAssertNotExists /etc/fapolicyd/fapolicyd.rules
@@ -177,10 +248,10 @@ EOF
     rlPhaseStartTest "upgrade from old version - default rules" && {
       # fapolicyd.rules should be replace with populated rules.d
       rlRun "rm -rf /etc/fapolicyd"
-      rlRun "yum install fapolicyd-$V_old-$R_old -y --allowerasing"
-      rlRun "yum reinstall fapolicyd-$V_old-$R_old -y --allowerasing"
+      rlRun "dnf install fapolicyd-$V_old-$R_old -y --allowerasing"
+      rlRun "dnf reinstall fapolicyd-$V_old-$R_old -y --allowerasing"
       rlRun "ls -la /etc/fapolicyd/"
-      rlRun "yum install fapolicyd-$V-$R -y --allowerasing"
+      rlRun "dnf install fapolicyd-$V-$R -y --allowerasing"
       rlRun "ls -la /etc/fapolicyd/"
       rlRun "ls -la /etc/fapolicyd/rules.d/"
       rlAssertNotExists /etc/fapolicyd/fapolicyd.rules
@@ -191,11 +262,11 @@ EOF
       # fapolicyd.rules should stay untouched
       # rules.d should not be populated
       rlRun "rm -rf /etc/fapolicyd"
-      rlRun "yum install fapolicyd-$V_old-$R_old -y --allowerasing"
-      rlRun "yum reinstall fapolicyd-$V_old-$R_old -y --allowerasing"
+      rlRun "dnf install fapolicyd-$V_old-$R_old -y --allowerasing"
+      rlRun "dnf reinstall fapolicyd-$V_old-$R_old -y --allowerasing"
       echo "allow perm=any all : all" >> /etc/fapolicyd/fapolicyd.rules
       rlRun "ls -la /etc/fapolicyd/"
-      rlRun "yum install fapolicyd-$V-$R -y --allowerasing"
+      rlRun "dnf install fapolicyd-$V-$R -y --allowerasing"
       rlRun "ls -la /etc/fapolicyd/"
       rlRun "ls -la /etc/fapolicyd/rules.d/"
       rlAssertExists /etc/fapolicyd/fapolicyd.rules
@@ -206,8 +277,8 @@ EOF
       # fapolicyd.rules should stay untouched
       # rules.d should not be populated
       rlRun "rm -rf /etc/fapolicyd"
-      rlRun "yum install fapolicyd-$V-$R -y --allowerasing"
-      rlRun "yum reinstall fapolicyd-$V-$R -y --allowerasing"
+      rlRun "dnf install fapolicyd-$V-$R -y --allowerasing"
+      rlRun "dnf reinstall fapolicyd-$V-$R -y --allowerasing"
       rlRun "rm -f /etc/fapolicyd/rules.d/*"
       cat > /etc/fapolicyd/fapolicyd.rules <<EOF
 %languages=application/x-bytecode.ocaml,application/x-bytecode.python,application/java-archive,text/x-java,application/x-java-applet,application/javascript,text/javascript,text/x-awk,text/x-gawk,text/x-lisp,application/x-elc,text/x-lua,text/x-m4,text/x-nftables,text/x-perl,text/x-php,text/x-python,text/x-R,text/x-ru
@@ -231,7 +302,7 @@ EOF
       rlRun "ls -la /etc/fapolicyd/rules.d/"
       rlAssertExists /etc/fapolicyd/fapolicyd.rules
       rlAssertEquals "rules are deployed into /etc/fapolicyd/rules.d" $(ls -1 /etc/fapolicyd/rules.d | wc -w) 0
-      rlRun "yum install ${_98} -y --allowerasing"
+      rlRun "dnf install ${_98} -y --allowerasing"
       rlRun "ls -la /etc/fapolicyd/"
       rlRun "ls -la /etc/fapolicyd/rules.d/"
       rlAssertExists /etc/fapolicyd/fapolicyd.rules
@@ -242,15 +313,15 @@ EOF
       # fapolicyd.rules should not exit
       # rules.d should stay untouched
       rlRun "rm -rf /etc/fapolicyd"
-      rlRun "yum install fapolicyd-$V-$R -y --allowerasing"
-      rlRun "yum reinstall fapolicyd-$V-$R -y --allowerasing"
+      rlRun "dnf install fapolicyd-$V-$R -y --allowerasing"
+      rlRun "dnf reinstall fapolicyd-$V-$R -y --allowerasing"
       rlRun "ls -la /etc/fapolicyd/"
       rlRun "ls -la /etc/fapolicyd/rules.d/"
       echo "allow perm=any all : all" >> /etc/fapolicyd/rules.d/95-allow-open.rules
       rlRun -s "cat /etc/fapolicyd/rules.d/95-allow-open.rules"
       rlAssertGrep 'allow perm=open' $rlRun_LOG
       rlAssertGrep 'allow perm=any' $rlRun_LOG
-      rlRun "yum install ${_98} -y --allowerasing"
+      rlRun "dnf install ${_98} -y --allowerasing"
       rlRun "ls -la /etc/fapolicyd/"
       rlRun "ls -la /etc/fapolicyd/rules.d/"
       rlRun -s "cat /etc/fapolicyd/rules.d/95-allow-open.rules"
@@ -262,13 +333,13 @@ EOF
       # fapolicyd.rules should not exit
       # rules.d should be updated
       rlRun "rm -rf /etc/fapolicyd"
-      rlRun "yum install fapolicyd-$V-$R -y --allowerasing"
-      rlRun "yum reinstall fapolicyd-$V-$R -y --allowerasing"
+      rlRun "dnf install fapolicyd-$V-$R -y --allowerasing"
+      rlRun "dnf reinstall fapolicyd-$V-$R -y --allowerasing"
       rlRun "ls -la /etc/fapolicyd/"
       rlRun "ls -la /etc/fapolicyd/rules.d/"
       rlRun -s "cat /etc/fapolicyd/rules.d/95-allow-open.rules"
       rlAssertGrep 'allow perm=open' $rlRun_LOG
-      rlRun "yum install ${_99} -y --allowerasing"
+      rlRun "dnf install ${_99} -y --allowerasing"
       rlRun "ls -la /etc/fapolicyd/"
       rlRun "ls -la /etc/fapolicyd/rules.d/"
       rlRun -s "cat /etc/fapolicyd/rules.d/95-allow-open.rules"
@@ -280,15 +351,15 @@ EOF
       # fapolicyd.rules should not exit
       # rules.d should stay untouched
       rlRun "rm -rf /etc/fapolicyd"
-      rlRun "yum install fapolicyd-$V-$R -y --allowerasing"
-      rlRun "yum reinstall fapolicyd-$V-$R -y --allowerasing"
+      rlRun "dnf install fapolicyd-$V-$R -y --allowerasing"
+      rlRun "dnf reinstall fapolicyd-$V-$R -y --allowerasing"
       rlRun "echo 'allow perm=open exe=/path/to/binary : all' > /etc/fapolicyd/rules.d/51-custom.rules"
       rlRun "ls -la /etc/fapolicyd/"
       rlRun "ls -la /etc/fapolicyd/rules.d/"
       rlRun -s "cat /etc/fapolicyd/rules.d/95-allow-open.rules"
       rlAssertGrep 'allow perm=open' $rlRun_LOG
       rlAssertGrep 'allow perm=open exe=/path/to/binary : all' /etc/fapolicyd/rules.d/51-custom.rules
-      rlRun "yum install ${_98} -y --allowerasing"
+      rlRun "dnf install ${_98} -y --allowerasing"
       rlRun "ls -la /etc/fapolicyd/"
       rlRun "ls -la /etc/fapolicyd/rules.d/"
       rlRun -s "cat /etc/fapolicyd/rules.d/95-allow-open.rules"
@@ -300,15 +371,15 @@ EOF
       # fapolicyd.rules should not exit
       # rules.d should be populated
       rlRun "rm -rf /etc/fapolicyd"
-      rlRun "yum install fapolicyd-$V-$R -y --allowerasing"
-      rlRun "yum reinstall fapolicyd-$V-$R -y --allowerasing"
+      rlRun "dnf install fapolicyd-$V-$R -y --allowerasing"
+      rlRun "dnf reinstall fapolicyd-$V-$R -y --allowerasing"
       rlRun "echo 'allow perm=open exe=/path/to/binary : all' > /etc/fapolicyd/rules.d/51-custom.rules"
       rlRun "ls -la /etc/fapolicyd/"
       rlRun "ls -la /etc/fapolicyd/rules.d/"
       rlRun -s "cat /etc/fapolicyd/rules.d/95-allow-open.rules"
       rlAssertGrep 'allow perm=open' $rlRun_LOG
       rlAssertGrep 'allow perm=open exe=/path/to/binary : all' /etc/fapolicyd/rules.d/51-custom.rules
-      rlRun "yum install ${_99} -y --allowerasing"
+      rlRun "dnf install ${_99} -y --allowerasing"
       rlRun "ls -la /etc/fapolicyd/"
       rlRun "ls -la /etc/fapolicyd/rules.d/"
       rlRun -s "cat /etc/fapolicyd/rules.d/95-allow-open.rules"
@@ -321,13 +392,13 @@ EOF
       # fapolicyd.rules should be removed
       # rules.d should be removed
       rlRun "rm -rf /etc/fapolicyd"
-      rlRun "yum install fapolicyd-$V-$R -y --allowerasing"
-      rlRun "yum reinstall fapolicyd-$V-$R -y --allowerasing"
+      rlRun "dnf install fapolicyd-$V-$R -y --allowerasing"
+      rlRun "dnf reinstall fapolicyd-$V-$R -y --allowerasing"
       rlRun "ls -la /etc/fapolicyd/"
       rlRun "ls -la /etc/fapolicyd/rules.d/"
       rlRun -s "cat /etc/fapolicyd/rules.d/95-allow-open.rules"
       rlAssertGrep 'allow perm=open' $rlRun_LOG
-      rlRun "yum remove fapolicyd -y"
+      rlRun "dnf remove fapolicyd -y"
       rlRun "ls -la /etc/fapolicyd/" 0-255
       rlRun "ls -la /etc/fapolicyd/rules.d/" 0-255
       [[ -d /etc/fapolicyd/rules.d/ ]] && rlAssertEquals "rules are deployed into /etc/fapolicyd/rules.d" $(ls -1 /etc/fapolicyd/rules.d | wc -w) 0
@@ -337,15 +408,15 @@ EOF
       # fapolicyd.rules should not exit
       # rules.d should stay untouched
       rlRun "rm -rf /etc/fapolicyd"
-      rlRun "yum install fapolicyd-$V-$R -y --allowerasing"
-      rlRun "yum reinstall fapolicyd-$V-$R -y --allowerasing"
+      rlRun "dnf install fapolicyd-$V-$R -y --allowerasing"
+      rlRun "dnf reinstall fapolicyd-$V-$R -y --allowerasing"
       rlRun "echo 'allow perm=open exe=/path/to/binary : all' > /etc/fapolicyd/rules.d/51-custom.rules"
       rlRun "ls -la /etc/fapolicyd/"
       rlRun "ls -la /etc/fapolicyd/rules.d/"
       rlRun -s "cat /etc/fapolicyd/rules.d/95-allow-open.rules"
       rlAssertGrep 'allow perm=open' $rlRun_LOG
       rlAssertGrep 'allow perm=open exe=/path/to/binary : all' /etc/fapolicyd/rules.d/51-custom.rules
-      rlRun "yum remove fapolicyd -y"
+      rlRun "dnf remove fapolicyd -y"
       rlRun "ls -la /etc/fapolicyd/" 0-255
       rlRun "ls -la /etc/fapolicyd/rules.d/" 0-255
       rlAssertGreater "rules are deployed into /etc/fapolicyd/rules.d" $(ls -1 /etc/fapolicyd/rules.d | wc -w) 0
@@ -355,14 +426,14 @@ EOF
       # fapolicyd.rules should not exit
       # rules.d should stay untouched
       rlRun "rm -rf /etc/fapolicyd"
-      rlRun "yum install fapolicyd-$V-$R -y --allowerasing"
-      rlRun "yum reinstall fapolicyd-$V-$R -y --allowerasing"
+      rlRun "dnf install fapolicyd-$V-$R -y --allowerasing"
+      rlRun "dnf reinstall fapolicyd-$V-$R -y --allowerasing"
       rlRun "sed -ir 's/open/any/' /etc/fapolicyd/rules.d/95-allow-open.rules"
       rlRun "ls -la /etc/fapolicyd/"
       rlRun "ls -la /etc/fapolicyd/rules.d/"
       rlRun -s "cat /etc/fapolicyd/rules.d/95-allow-open.rules"
       rlAssertGrep 'allow perm=any' $rlRun_LOG
-      rlRun "yum remove fapolicyd -y"
+      rlRun "dnf remove fapolicyd -y"
       rlRun "ls -la /etc/fapolicyd/" 0-255
       rlRun "ls -la /etc/fapolicyd/rules.d/" 0-255
       rlAssertGreater "rules are deployed into /etc/fapolicyd/rules.d" $(ls -1 /etc/fapolicyd/rules.d | wc -w) 0
@@ -370,7 +441,7 @@ EOF
 
     if rlIsRHELLike '>=9.7' ; then
       rlPhaseStartTest "RHEL-30020 - custom rule pattern=normal" && {
-        rlRun "yum install fapolicyd -y --allowerasing"
+        rlRun "dnf install fapolicyd -y --allowerasing"
         rlRun "fapStart"
         TIMESTAMP=$(date +"%F %T")
         rlRun "echo 'deny_audit perm=any pattern=normal : all' > /etc/fapolicyd/rules.d/28-custom.rules"
