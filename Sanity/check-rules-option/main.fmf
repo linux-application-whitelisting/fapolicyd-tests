@@ -1,0 +1,24 @@
+summary: test if the --check-rules option works as expected
+contact: Milos Malik <mmalik@redhat.com>
+test: ./runtest.sh
+duration: 5m
+enabled: true
+require:
+  - fapolicyd
+  - fapolicyd-selinux
+  - man-db
+  - sed
+tag:
+  - NoRHEL4
+  - NoRHEL5
+  - NoRHEL6
+  - NoRHEL7
+  - NoRHEL8
+adjust+:
+  - enabled: false
+    when: distro == rhel-4, rhel-5, rhel-6, rhel-7, rhel-8
+    because: the option is not implemented there
+link:
+  - verifies: https://issues.redhat.com/browse/RHEL-13011
+  - verifies: https://issues.redhat.com/browse/RHEL-169985
+
