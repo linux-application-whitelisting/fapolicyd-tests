@@ -86,16 +86,11 @@ rlJournalStart && {
     R2=".$(echo "$R" | cut -d . -f 2-)"
     rlRun -s "rpmbuild -bb -D 'dist ${R2}_98' ~/rpmbuild/SPECS/fapolicyd.spec" 0 "build newer package"
     rlRun_LOG1=$rlRun_LOG
-    rlRun "(cd ~/rpmbuild/SPECS/; patch -p0)" << 'EOF'
---- fapolicyd.spec      2022-01-26 09:04:22.000000000 -0500
-+++ fapolicyd.spec  2022-02-08 13:42:23.601603383 -0500
-@@ -37,1 +37,2 @@
-+Patch99: rules.patch
- %description
-@@ -89,1 +89,2 @@
-+%patch99 -p1 -b .rules
- %build
-EOF
+    rlRun "sed -i '/^%description$/i Patch99: rules.patch' ~/rpmbuild/SPECS/fapolicyd.spec" 0 "Add Patch99 declaration to spec"
+    if grep -q '^%patch ' ~/rpmbuild/SPECS/fapolicyd.spec; then
+      last_patch_line=$(grep -n '^%patch ' ~/rpmbuild/SPECS/fapolicyd.spec | tail -1 | cut -d: -f1)
+      rlRun "sed -i '${last_patch_line}a %patch -P 99 -p1 -b .rules' ~/rpmbuild/SPECS/fapolicyd.spec" 0 "Add manual Patch99 application for non-autosetup spec"
+    fi
     cat > ~/rpmbuild/SOURCES/rules.patch << 'EOF'
 diff --git a/rules.d/95-allow-open.rules b/rules.d/95-allow-open.rules
 index c0ab31c..9103e12 100644
