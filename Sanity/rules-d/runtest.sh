@@ -29,12 +29,46 @@
 . /usr/share/beakerlib/beakerlib.sh || exit 1
 
 PACKAGE="fapolicyd"
+
+ensure_crb_repo() {
+  ! rlIsFedora || return 0
+  command -v dnf > /dev/null || return 0
+
+  # Build dependencies may live in CRB/CodeReadyBuilder depending on distro.
+  local crb_repos=(rhel-CRB crb)
+  local crb_regex
+
+  if rlIsRHEL '>=9'; then
+    crb_repos+=("codeready-builder-for-rhel-$(rpm -E '%{rhel}')-$(rpm --eval '%{_arch}')-rpms")
+  fi
+
+  crb_regex="^[[:space:]]*($(IFS='|'; echo "${crb_repos[*]}"))([[:space:]]|$)"
+  if ! dnf -q repolist enabled | grep -Eq "$crb_regex"; then
+    local repo
+    for repo in "${crb_repos[@]}"; do
+      dnf -q config-manager --set-enabled "$repo" && break
+    done
+  fi
+
+  if dnf -q repolist enabled | grep -Eq "$crb_regex"; then
+    rlLogInfo "CRB-like build repo is enabled."
+  else
+    rlLogWarning "No CRB-like repo enabled; continuing and relying on currently available build dependencies."
+  fi
+}
+
 rlJournalStart && {
   rlPhaseStartSetup && {
+    if command -v dnf >/dev/null 2>&1; then
+      pkg_mgr=dnf
+      builddep_cmd="dnf -y builddep"
+    else
+      pkg_mgr=yum
+      builddep_cmd="yum-builddep -y"
+    fi
     rlRun "rlImport --all" 0 "Import libraries" || rlDie "cannot continue"
-    tcfRun "rlCheckMakefileRequires" || rlDie "cannot continue"
-    rlRun "dnf repolist enabled | grep rhel-CRB" 0 "Check if required rhel-CRB repo is enabled" || rlDie "cannot continue"
-    # || "dnf config-manager --set-enabled rhel-CRB"
+    tcfRun "rlCheckDependencies" || rlDie "cannot continue"
+    ensure_crb_repo
     IFS=' ' read -r SRC N V R A < <(rpm -q --qf '%{sourcerpm} %{name} %{version} %{release} %{arch}\n' fapolicyd)
     rlRun "TmpDir=\$(mktemp -d)" 0 "Creating tmp directory"
     CleanupRegister "rlRun 'rm -r $TmpDir' 0 'Removing tmp directory'"
@@ -48,7 +82,7 @@ rlJournalStart && {
     rlRun "RpmSnapshotCreate"
     rlRun "rlFetchSrcForInstalled fapolicyd"
     rlRun "rpm -ivh ./fapolicyd*.src.rpm"
-    rlRun "yum-builddep -y ~/rpmbuild/SPECS/fapolicyd.spec"
+    rlRun "${builddep_cmd} ~/rpmbuild/SPECS/fapolicyd.spec"
     R2=".$(echo "$R" | cut -d . -f 2-)"
     rlRun -s "rpmbuild -bb -D 'dist ${R2}_98' ~/rpmbuild/SPECS/fapolicyd.spec" 0 "build newer package"
     rlRun_LOG1=$rlRun_LOG
@@ -108,12 +142,18 @@ EOF
     _98=$( cat $rlRun_LOG | grep -o 'fapolicyd-[0-9].*_98.*\.rpm' | sed -r 's/\.rpm//' )
     _99=$( cat $rlRun_LOG | grep -o 'fapolicyd-[0-9].*_99.*\.rpm' | sed -r 's/\.rpm//' )
     popd
-    which dnf &>/dev/null && _dnfc=dnf\ || _dnfc=yum-
-    rlRun "${_dnfc}config-manager --add-repo file://$PWD/rpms"
-    repofile=$(grep -l "file://$PWD/rpms" /etc/yum.repos.d/*.repo)
+    repofile=/etc/yum.repos.d/fapolicyd-tests-local.repo
+    rlRun "cat > $repofile << EOF
+[fapolicyd-tests-local]
+name=fapolicyd-tests-local
+baseurl=file://$PWD/rpms
+enabled=1
+gpgcheck=0
+sslverify=0
+skip_if_unavailable=1
+EOF"
     CleanupRegister "rlRun 'rm -f $repofile'"
-    rlRun "yum clean all"
-    rlRun "echo -e 'sslverify=0\ngpgcheck=0\nskip_if_unavailable=1' >> $repofile"
+    rlRun "${pkg_mgr} clean all"
     rlRun "repoquery -a | grep fapolicyd" 0-255
   rlPhaseEnd; }
 
