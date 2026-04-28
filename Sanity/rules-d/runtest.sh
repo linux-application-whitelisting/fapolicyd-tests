@@ -105,29 +105,30 @@ EOF
     pushd rpms
     rlRun "cp $(grep 'Wrote:' $rlRun_LOG | cut -d ' ' -f 2 | tr '\n' ' ') $(grep 'Wrote:' $rlRun_LOG1 | cut -d ' ' -f 2 | tr '\n' ' ') ./"
     packages=()
-    if rlIsFedora; then
-      V_old=1.0.4
-      R_old=1.fc35
-    elif rlIsRHEL '>=10' || rlIsRHELLike '>=10'; then
-      V_old=1.3.2
-      R_old=4.el10
-    elif rlIsRHEL '>=9' || rlIsRHELLike '>=9'; then
-      V_old=1.0.3
-      R_old=4.el9
-      packages+=(
-        fapolicyd-dnf-plugin-${V_old}-${R_old}.noarch
-      )
-    elif rlIsRHEL '>=8' || rlIsRHELLike '>=8'; then
-      V_old=1.0.2
-      R_old=6.el8
-    fi
-    
+    mapfile -t fap_versions < <(repoquery --show-duplicates --archlist "$A,noarch" --qf '%{version} %{release}' fapolicyd | awk '!seen[$0]++' | sort -V)
+    V_old=
+    R_old=
+    for ((i=0; i<${#fap_versions[@]}; i++)); do
+      if [[ "${fap_versions[$i]}" == "$V $R" && $i -gt 0 ]]; then
+        read -r V_old R_old <<< "${fap_versions[$((i-1))]}"
+        break
+      fi
+    done
+
+    [[ -n "$V_old" && -n "$R_old" ]] || rlDie "Unable to determine previous fapolicyd version from enabled repositories"
+
     packages+=(
       fapolicyd-${V_old}-${R_old}.$A
       #fapolicyd-debuginfo-${V_old}-${R_old}.$A
       #fapolicyd-debugsource-${V_old}-${R_old}.$A
-      fapolicyd-selinux-${V_old}-${R_old}.noarch
     )
+
+    for optional_pkg in fapolicyd-selinux fapolicyd-dnf-plugin; do
+      if repoquery --qf '%{name}-%{version}-%{release}.%{arch}' "${optional_pkg}" 2>/dev/null | \
+        awk -v nvr="${optional_pkg}-${V_old}-${R_old}.noarch" '$0 == nvr {found=1} END {exit !found}'; then
+        packages+=("${optional_pkg}-${V_old}-${R_old}.noarch")
+      fi
+    done
 
     for package in "${packages[@]}"; do
       rlRpmDownload $package
