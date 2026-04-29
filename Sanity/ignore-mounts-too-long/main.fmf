@@ -1,0 +1,24 @@
+summary: test if ignore_mounts option allows enough entries
+contact: Milos Malik <mmalik@redhat.com>
+test: ./runtest.sh
+duration: 5m
+enabled: true
+require:
+  - fapolicyd
+  - fapolicyd-selinux
+  - nfs-utils
+  - sed
+tag:
+  - NoRHEL4
+  - NoRHEL5
+  - NoRHEL6
+  - NoRHEL7
+  - NoRHEL8
+adjust+:
+  - enabled: false
+    when: distro == rhel-4, rhel-5, rhel-6, rhel-7, rhel-8
+    because: the test is not relevant there
+link:
+  - verifies: https://issues.redhat.com/browse/RHEL-157947
+  - verifies: https://issues.redhat.com/browse/RHEL-170173
+
