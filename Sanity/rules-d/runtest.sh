@@ -32,7 +32,7 @@ PACKAGE="fapolicyd"
 rlJournalStart && {
   rlPhaseStartSetup && {
     rlRun "rlImport --all" 0 "Import libraries" || rlDie "cannot continue"
-    tcfRun "rlCheckMakefileRequires" || rlDie "cannot continue"
+    tcfRun "rlCheckDependencies" || rlDie "cannot continue"
     rlRun "dnf repolist enabled | grep rhel-CRB" 0 "Check if required rhel-CRB repo is enabled" || rlDie "cannot continue"
     # || "dnf config-manager --set-enabled rhel-CRB"
     IFS=' ' read -r SRC N V R A < <(rpm -q --qf '%{sourcerpm} %{name} %{version} %{release} %{arch}\n' fapolicyd)

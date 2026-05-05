@@ -44,7 +44,7 @@ INTERPRETER=`which perl`
 rlJournalStart
     rlPhaseStartSetup
         rlRun "rlImport --all" || rlDie 'cannot continue'
-        rlRun "rlCheckMakefileRequires" || rlDie 'cannot continue'
+        rlRun "rlCheckDependencies" || rlDie 'cannot continue'
 	rlRun "useradd $USER"
 	rlRun "usermod -aG wheel $USER"
 	rlRun "cp $TEST_SCRIPT $SCRIPT_PATH"

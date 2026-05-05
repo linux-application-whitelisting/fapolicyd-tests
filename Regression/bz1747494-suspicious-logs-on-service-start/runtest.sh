@@ -38,7 +38,7 @@ _CONFIG_F2="/etc/fapolicyd/fapolicyd.conf"
 rlJournalStart
     rlPhaseStartSetup
         rlRun "rlImport --all" || rlDie 'cannot continue'
-        rlRun "rlCheckMakefileRequires" || rlDie 'cannot continue'
+        rlRun "rlCheckDependencies" || rlDie 'cannot continue'
         rlRun "fapSetup"
         rlRun "rm -rf /var/lib/$PACKAGE/*"
         rlRun "rm -rf /var/run/$PACKAGE/*"

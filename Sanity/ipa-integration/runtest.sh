@@ -44,7 +44,7 @@ rlJournalStart && {
       rlRun "dnf -y module remove idm:client"
       rlRun "dnf -y module install idm:DL1/dns"
     fi
-    tcfRun "rlCheckMakefileRequires" || rlDie "cannot continue"
+    tcfRun "rlCheckDependencies" || rlDie "cannot continue"
     rlRun "TmpDir=\$(mktemp -d)" 0 "Creating tmp directory"
     CleanupRegister "rlRun 'rm -r $TmpDir' 0 'Removing tmp directory'"
     CleanupRegister 'rlRun "popd"'
