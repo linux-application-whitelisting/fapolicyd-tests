@@ -39,7 +39,7 @@ _CONFIG_F3="/etc/fapolicyd/fapolicyd.conf"
 rlJournalStart
     rlPhaseStartSetup
         rlRun "rlImport --all" || rlDie 'cannot continue'
-        rlRun "rlCheckMakefileRequires" || rlDie 'cannot continue'
+        rlRun "rlCheckDependencies" || rlDie 'cannot continue'
         rlRun "TmpDir=\$(mktemp -d)" 0 "Creating tmp directory"
         rlRun "pushd $TmpDir"
         rlRun "fapSetup"

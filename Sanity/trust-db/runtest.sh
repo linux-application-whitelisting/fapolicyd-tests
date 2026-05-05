@@ -59,7 +59,7 @@ Trust() {
 rlJournalStart && {
   rlPhaseStartSetup && {
     rlRun "rlImport --all" 0 "Import libraries" || rlDie "cannot continue"
-    tcfRun "rlCheckMakefileRequires" || rlDie "cannot continue"
+    tcfRun "rlCheckDependencies" || rlDie "cannot continue"
     test_dir="$PWD"
     rlRun "TmpDir=\$(mktemp -d)" 0 "Creating tmp directory"
     CleanupRegister "rlRun 'rm -r $TmpDir' 0 'Removing tmp directory'"

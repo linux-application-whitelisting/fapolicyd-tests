@@ -32,7 +32,7 @@ PACKAGE="fapolicyd"
 rlJournalStart
     rlPhaseStartSetup
         rlRun "rlImport --all" || rlDie 'cannot continue'
-        rlRun "rlCheckMakefileRequires" || rlDie 'cannot continue'
+        rlRun "rlCheckDependencies" || rlDie 'cannot continue'
         rlRun "rlFileBackup /usr/local/bin/"
         rlRun "rlFileBackup --clean /mnt/test_mount_point/"
         rlRun "TmpDir=\$(mktemp -d)" 0 "Creating tmp directory"
