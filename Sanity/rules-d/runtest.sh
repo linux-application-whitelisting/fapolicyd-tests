@@ -29,12 +29,46 @@
 . /usr/share/beakerlib/beakerlib.sh || exit 1
 
 PACKAGE="fapolicyd"
+
+ensure_crb_repo() {
+  ! rlIsFedora || return 0
+  command -v dnf > /dev/null || return 0
+
+  # Build dependencies may live in CRB/CodeReadyBuilder depending on distro.
+  local crb_repos=(rhel-CRB crb)
+  local crb_regex
+
+  if rlIsRHEL '>=9'; then
+    crb_repos+=("codeready-builder-for-rhel-$(rpm -E '%{rhel}')-$(rpm --eval '%{_arch}')-rpms")
+  fi
+
+  crb_regex="^[[:space:]]*($(IFS='|'; echo "${crb_repos[*]}"))([[:space:]]|$)"
+  if ! dnf -q repolist enabled | grep -Eq "$crb_regex"; then
+    local repo
+    for repo in "${crb_repos[@]}"; do
+      dnf -q config-manager --set-enabled "$repo" && break
+    done
+  fi
+
+  if dnf -q repolist enabled | grep -Eq "$crb_regex"; then
+    rlLogInfo "CRB-like build repo is enabled."
+  else
+    rlLogWarning "No CRB-like repo enabled; continuing and relying on currently available build dependencies."
+  fi
+}
+
 rlJournalStart && {
   rlPhaseStartSetup && {
+    if command -v dnf >/dev/null 2>&1; then
+      pkg_mgr=dnf
+      builddep_cmd="dnf -y builddep"
+    else
+      pkg_mgr=yum
+      builddep_cmd="yum-builddep -y"
+    fi
     rlRun "rlImport --all" 0 "Import libraries" || rlDie "cannot continue"
-    tcfRun "rlCheckMakefileRequires" || rlDie "cannot continue"
-    rlRun "dnf repolist enabled | grep rhel-CRB" 0 "Check if required rhel-CRB repo is enabled" || rlDie "cannot continue"
-    # || "dnf config-manager --set-enabled rhel-CRB"
+    tcfRun "rlCheckDependencies" || rlDie "cannot continue"
+    ensure_crb_repo
     IFS=' ' read -r SRC N V R A < <(rpm -q --qf '%{sourcerpm} %{name} %{version} %{release} %{arch}\n' fapolicyd)
     rlRun "TmpDir=\$(mktemp -d)" 0 "Creating tmp directory"
     CleanupRegister "rlRun 'rm -r $TmpDir' 0 'Removing tmp directory'"
@@ -48,20 +82,15 @@ rlJournalStart && {
     rlRun "RpmSnapshotCreate"
     rlRun "rlFetchSrcForInstalled fapolicyd"
     rlRun "rpm -ivh ./fapolicyd*.src.rpm"
-    rlRun "yum-builddep -y ~/rpmbuild/SPECS/fapolicyd.spec"
+    rlRun "${builddep_cmd} ~/rpmbuild/SPECS/fapolicyd.spec"
     R2=".$(echo "$R" | cut -d . -f 2-)"
     rlRun -s "rpmbuild -bb -D 'dist ${R2}_98' ~/rpmbuild/SPECS/fapolicyd.spec" 0 "build newer package"
     rlRun_LOG1=$rlRun_LOG
-    rlRun "(cd ~/rpmbuild/SPECS/; patch -p0)" << 'EOF'
---- fapolicyd.spec      2022-01-26 09:04:22.000000000 -0500
-+++ fapolicyd.spec  2022-02-08 13:42:23.601603383 -0500
-@@ -37,1 +37,2 @@
-+Patch99: rules.patch
- %description
-@@ -89,1 +89,2 @@
-+%patch99 -p1 -b .rules
- %build
-EOF
+    rlRun "sed -i '/^%description$/i Patch99: rules.patch' ~/rpmbuild/SPECS/fapolicyd.spec" 0 "Add Patch99 declaration to spec"
+    if grep -q '^%patch ' ~/rpmbuild/SPECS/fapolicyd.spec; then
+      last_patch_line=$(grep -n '^%patch ' ~/rpmbuild/SPECS/fapolicyd.spec | tail -1 | cut -d: -f1)
+      rlRun "sed -i '${last_patch_line}a %patch -P 99 -p1 -b .rules' ~/rpmbuild/SPECS/fapolicyd.spec" 0 "Add manual Patch99 application for non-autosetup spec"
+    fi
     cat > ~/rpmbuild/SOURCES/rules.patch << 'EOF'
 diff --git a/rules.d/95-allow-open.rules b/rules.d/95-allow-open.rules
 index c0ab31c..9103e12 100644
@@ -76,29 +105,30 @@ EOF
     pushd rpms
     rlRun "cp $(grep 'Wrote:' $rlRun_LOG | cut -d ' ' -f 2 | tr '\n' ' ') $(grep 'Wrote:' $rlRun_LOG1 | cut -d ' ' -f 2 | tr '\n' ' ') ./"
     packages=()
-    if rlIsFedora; then
-      V_old=1.0.4
-      R_old=1.fc35
-    elif rlIsRHEL '>=10' || rlIsRHELLike '>=10'; then
-      V_old=1.3.2
-      R_old=4.el10
-    elif rlIsRHEL '>=9' || rlIsRHELLike '>=9'; then
-      V_old=1.0.3
-      R_old=4.el9
-      packages+=(
-        fapolicyd-dnf-plugin-${V_old}-${R_old}.noarch
-      )
-    elif rlIsRHEL '>=8' || rlIsRHELLike '>=8'; then
-      V_old=1.0.2
-      R_old=6.el8
-    fi
-    
+    mapfile -t fap_versions < <(repoquery --show-duplicates --archlist "$A,noarch" --qf '%{version} %{release}' fapolicyd | awk '!seen[$0]++' | sort -V)
+    V_old=
+    R_old=
+    for ((i=0; i<${#fap_versions[@]}; i++)); do
+      if [[ "${fap_versions[$i]}" == "$V $R" && $i -gt 0 ]]; then
+        read -r V_old R_old <<< "${fap_versions[$((i-1))]}"
+        break
+      fi
+    done
+
+    [[ -n "$V_old" && -n "$R_old" ]] || rlDie "Unable to determine previous fapolicyd version from enabled repositories"
+
     packages+=(
       fapolicyd-${V_old}-${R_old}.$A
       #fapolicyd-debuginfo-${V_old}-${R_old}.$A
       #fapolicyd-debugsource-${V_old}-${R_old}.$A
-      fapolicyd-selinux-${V_old}-${R_old}.noarch
     )
+
+    for optional_pkg in fapolicyd-selinux fapolicyd-dnf-plugin; do
+      if repoquery --qf '%{name}-%{version}-%{release}.%{arch}' "${optional_pkg}" 2>/dev/null | \
+        awk -v nvr="${optional_pkg}-${V_old}-${R_old}.noarch" '$0 == nvr {found=1} END {exit !found}'; then
+        packages+=("${optional_pkg}-${V_old}-${R_old}.noarch")
+      fi
+    done
 
     for package in "${packages[@]}"; do
       rlRpmDownload $package
@@ -108,12 +138,18 @@ EOF
     _98=$( cat $rlRun_LOG | grep -o 'fapolicyd-[0-9].*_98.*\.rpm' | sed -r 's/\.rpm//' )
     _99=$( cat $rlRun_LOG | grep -o 'fapolicyd-[0-9].*_99.*\.rpm' | sed -r 's/\.rpm//' )
     popd
-    which dnf &>/dev/null && _dnfc=dnf\ || _dnfc=yum-
-    rlRun "${_dnfc}config-manager --add-repo file://$PWD/rpms"
-    repofile=$(grep -l "file://$PWD/rpms" /etc/yum.repos.d/*.repo)
+    repofile=/etc/yum.repos.d/fapolicyd-tests-local.repo
+    rlRun "cat > $repofile << EOF
+[fapolicyd-tests-local]
+name=fapolicyd-tests-local
+baseurl=file://$PWD/rpms
+enabled=1
+gpgcheck=0
+sslverify=0
+skip_if_unavailable=1
+EOF"
     CleanupRegister "rlRun 'rm -f $repofile'"
-    rlRun "yum clean all"
-    rlRun "echo -e 'sslverify=0\ngpgcheck=0\nskip_if_unavailable=1' >> $repofile"
+    rlRun "${pkg_mgr} clean all"
     rlRun "repoquery -a | grep fapolicyd" 0-255
   rlPhaseEnd; }
 
