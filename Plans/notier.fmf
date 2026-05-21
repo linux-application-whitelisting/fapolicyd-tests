@@ -1,0 +1,18 @@
+summary: test plan for running tests which do not belong to any tier
+
+discover:
+  - name: notier_tests_fapolicyd
+    how: fmf
+    filter: 'tier:-1 & tier:-2 & tier:-3 & tag:-Tier1 & tag:-Tier2 & tag:-Tier3 & tag:-CI-Tier-1 & name:-/destructive/.* & name:-/update/.*'
+
+adjust+:
+  - when: trigger == build
+    enabled: false
+    because: do not run this plan on a new build
+  - when: trigger == commit
+    enabled: false
+    because: do not run this plan on changes caused by a PR/MR
+
+execute:
+    how: tmt
+
