@@ -32,9 +32,11 @@ PACKAGE="fapolicyd"
 rlJournalStart && {
   rlPhaseStartSetup && {
     rlRun "rlImport --all" 0 "Import libraries" || rlDie "cannot continue"
-    tcfRun "rlCheckMakefileRequires" || rlDie "cannot continue"
-    rlRun "dnf repolist enabled | grep rhel-CRB" 0 "Check if required rhel-CRB repo is enabled" || rlDie "cannot continue"
+    # tcfRun "rlCheckMakefileRequires" || rlDie "cannot continue"
+    # rlRun "dnf repolist enabled | grep rhel-CRB" 0 "Check if required rhel-CRB repo is enabled" || rlDie "cannot continue"
     # || "dnf config-manager --set-enabled rhel-CRB"
+    rlRun "rlFetchSrcForInstalled fapolicyd"
+    rlRun "yum-builddep ./fapolicyd-*.src.rpm --enablerepo '*' -y"
     IFS=' ' read -r SRC N V R A < <(rpm -q --qf '%{sourcerpm} %{name} %{version} %{release} %{arch}\n' fapolicyd)
     rlRun "TmpDir=\$(mktemp -d)" 0 "Creating tmp directory"
     CleanupRegister "rlRun 'rm -r $TmpDir' 0 'Removing tmp directory'"
@@ -46,7 +48,6 @@ rlJournalStart && {
     rlRun "fapSetup"
     CleanupRegister --mark "rlRun 'RpmSnapshotRevert'; rlRun 'RpmSnapshotDiscard'"
     rlRun "RpmSnapshotCreate"
-    rlRun "rlFetchSrcForInstalled fapolicyd"
     rlRun "rpm -ivh ./fapolicyd*.src.rpm"
     rlRun "yum-builddep -y ~/rpmbuild/SPECS/fapolicyd.spec"
     R2=".$(echo "$R" | cut -d . -f 2-)"

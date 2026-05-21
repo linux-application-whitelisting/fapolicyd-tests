@@ -10,7 +10,7 @@ require+:
   - createrepo_c
   - /usr/bin/yum-builddep
 recommend:
-  - rpmbuild
+  - /usr/bin/rpmbuild
   - file-devel
   - lmdb-devel
 tag:
