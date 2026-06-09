@@ -40,10 +40,18 @@ rlJournalStart
         rlRun "man fapolicyd-cli | col -b | grep -A 2 -- --check-rules"
         rlRun "fapolicyd-cli --help | grep -- --check-rules"
 
-        # without a rules files
-        rlRun -s "fapolicyd-cli --check-rules" 2
-        rlAssertGrep "requires.*argument" $rlRun_LOG -i
+        # the rules file is omitted but the default ones are present
+        rlRun -s "fapolicyd-cli --check-rules"
+        rlAssertGrep "rules file is valid" $rlRun_LOG -i
         rlRun "rm -f $rlRun_LOG"
+
+        # the rules file is omitted and the default ones are missing
+        rlRun "rlFileBackup --missing-ok /etc/fapolicyd/compiled.rules /etc/fapolicyd/fapolicyd.rules"
+        rlRun "rm -f /etc/fapolicyd/compiled.rules /etc/fapolicyd/fapolicyd.rules"
+        rlRun -s "fapolicyd-cli --check-rules" 7
+        rlAssertGrep "cannot open" $rlRun_LOG -i
+        rlRun "rm -f $rlRun_LOG"
+        rlRun "rlFileRestore"
 
         # non-existent rules file
         rlRun -s "fapolicyd-cli --check-rules ./non-existent.rules" 7
