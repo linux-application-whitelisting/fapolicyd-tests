@@ -1,0 +1,33 @@
+summary: SIGUSR1 during startup causes recvmsg EINTR crash
+description: |
+    Sending SIGUSR1 (e.g. dumping stats via fapolicyd-cli -D) while a
+    trust database reload is in progress causes recvmsg to return
+    -1/EINTR, crashing the daemon with "recvmsg failed". Signal
+    handlers are installed with sa_flags=0 (no SA_RESTART).
+
+    The test freezes the rpm-loader child with SIGSTOP to keep the
+    daemon blocked in recvmsg, sends SIGUSR1, then unfreezes the
+    loader with SIGCONT. This makes the race deterministic.
+contact: Renaud Métrich <rmetrich@redhat.com>
+test: ./runtest.sh
+require+:
+  - library(ControlFlow/Cleanup)
+  - fapolicyd
+duration: 10m
+enabled: true
+tag:
+  - Tier3
+tier: '3'
+link:
+  - verifies: https://issues.redhat.com/browse/RHEL-189482
+adjust+:
+  - enabled: false
+    when: distro == rhel-4, rhel-5, rhel-6, rhel-7, rhel-8
+    because: fapolicyd-rpm-loader does not exist there
+  - enabled: false
+    when: distro >= rhel-9 and distro < rhel-9.8
+    because: the fix is not yet available there
+  - enabled: false
+    when: distro >= rhel-10 and distro < rhel-10.2
+    because: the fix is not yet available there
+id: 23304c4d-33ba-434e-9eeb-09658e9c4906
