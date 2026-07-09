@@ -1,0 +1,24 @@
+summary: test if timing options work as expected
+contact: Milos Malik <mmalik@redhat.com>
+test: ./runtest.sh
+duration: 5m
+enabled: true
+require:
+  - fapolicyd
+  - fapolicyd-selinux
+  - diffutils
+  - sed
+tag:
+  - NoRHEL4
+  - NoRHEL5
+  - NoRHEL6
+  - NoRHEL7
+  - NoRHEL8
+  - Tier2
+tier: 2
+adjust+:
+  - enabled: false
+    when: distro == rhel-4, rhel-5, rhel-6, rhel-7, rhel-8
+    because: the option is not implemented there
+extra-nitrate: TC#0620342
+id: 43f583e9-e401-4757-8b9a-90bc7af2978f
