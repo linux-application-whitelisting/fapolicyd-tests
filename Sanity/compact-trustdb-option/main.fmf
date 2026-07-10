@@ -1,0 +1,20 @@
+summary: test if the --compact-trustdb option works as expected
+contact: Milos Malik <mmalik@redhat.com>
+test: ./runtest.sh
+duration: 5m
+enabled: true
+require:
+  - fapolicyd
+  - fapolicyd-selinux
+  - diffutils
+tag:
+  - NoRHEL4
+  - NoRHEL5
+  - NoRHEL6
+  - NoRHEL7
+  - NoRHEL8
+adjust+:
+  - enabled: false
+    when: distro < rhel-9
+    because: the option is not implemented there
+
