@@ -55,8 +55,20 @@ rlJournalStart
         rlRun "systemctl start fapolicyd"
         rlRun "df"
         rlRun "grep ^ignore_mounts /etc/fapolicyd/fapolicyd.conf"
-        rlRun -s "fapolicyd-cli --check-ignore_mounts" 0,3
+
+        rlLog "add 1 risky entry and check"
+        rlRun "cp -f /bin/ls /mnt/source-${ENTRY_COUNT}"
+        rlRun -s "fapolicyd-cli --check-ignore_mounts" 1
+        rlAssertGrep "total risky entries: 1" $rlRun_LOG -i
+        rlAssertGrep "executable regular files: 1" $rlRun_LOG -i
+        rlAssertGrep "ELF/shared objects: 1" $rlRun_LOG -i
+
+        rlLog "remove the risky entry and check again"
+        rlRun "rm -f /mnt/source-${ENTRY_COUNT}/ls"
+        rlRun -s "fapolicyd-cli --check-ignore_mounts"
         rlAssertNotGrep "error|skipping|too long" $rlRun_LOG -Ei
+        rlAssertEquals "summaries shown for all mount points" $(grep -ci summary $rlRun_LOG) $ENTRY_COUNT
+
         rlLog "check that all directories are listed"
         for I in $(seq 1 $ENTRY_COUNT) ; do
             grep -q "/mnt/target-$I:" $rlRun_LOG || rlFail "/mnt/target-$I not listed"
@@ -69,7 +81,8 @@ rlJournalStart
 
     rlPhaseStartCleanup
         for I in $(seq 1 $ENTRY_COUNT) ; do
-            rmdir /mnt/source-$I /mnt/target-$I
+            umount -fl /mnt/target-$I >& /dev/null
+            rm -rf /mnt/source-$I /mnt/target-$I
         done
         rlFileRestore
         rlServiceRestore fapolicyd

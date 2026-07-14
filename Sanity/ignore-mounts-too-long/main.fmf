@@ -1,7 +1,7 @@
 summary: test if ignore_mounts option allows enough entries
 contact: Milos Malik <mmalik@redhat.com>
 test: ./runtest.sh
-duration: 5m
+duration: 10m
 enabled: true
 require:
   - fapolicyd
@@ -21,4 +21,5 @@ adjust+:
 link:
   - verifies: https://issues.redhat.com/browse/RHEL-157947
   - verifies: https://issues.redhat.com/browse/RHEL-170173
-
+extra-nitrate: TC#0620034
+id: cf185248-b173-4780-9af5-ef96a8ad4266
