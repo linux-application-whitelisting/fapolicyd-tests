@@ -171,6 +171,7 @@ Restart=no
 ExecStart=
 ExecStart=${fapolicyd_path}fapolicyd $FAPOPTS
 LogRateLimitIntervalSec=0
+WatchdogSec=0
 EOF
       SYSTEMD_RELOAD=1
     }
