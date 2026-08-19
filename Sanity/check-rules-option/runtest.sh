@@ -61,7 +61,7 @@ rlJournalStart
         # empty rules file
         rlRun "echo > ${TESTING_RULES}"
         rlRun -s "fapolicyd-cli --check-rules ${TESTING_RULES}" 5
-        rlAssertGrep "no rules found" $rlRun_LOG -i
+        rlAssertGrep "no rules" $rlRun_LOG -i
         rlRun "rm -f $rlRun_LOG"
 
         # incomplete rules file

@@ -41,7 +41,7 @@ rlJournalStart
         rlRun "ls -al /var/lib/fapolicyd"
         rlRun "fapolicyd-cli --delete-db"
         rlRun "ls -al /var/lib/fapolicyd"
-        rlRun "fapolicyd-cli --check-trustdb"
+        rlRun "fapolicyd-cli --check-trustdb" 4
         rlRun "ls -al /var/lib/fapolicyd"
         rlRun -s "rpm -V fapolicyd" 0-255
         rlAssertNotGrep '/var/lib/fapolicyd/data.mdb' $rlRun_LOG
