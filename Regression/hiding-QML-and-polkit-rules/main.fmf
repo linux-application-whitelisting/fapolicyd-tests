@@ -1,0 +1,25 @@
+summary: test if fapolicyd accepts QML files and polkit rules
+contact: Milos Malik <mmalik@redhat.com>
+test: ./runtest.sh
+duration: 15m
+enabled: true
+require:
+  - fapolicyd
+tag:
+  - Tier3
+tier: 3
+link:
+  - verifies: https://issues.redhat.com/browse/RHEL-239786
+  - verifies: https://issues.redhat.com/browse/RHEL-239990
+adjust+:
+  - enabled: false
+    when: distro < rhel-9
+    because: the test is not relevant there
+  - enabled: false
+    when: distro >= rhel-9 and distro < rhel-9.9
+    because: the bug is not yet fixed there
+  - enabled: false
+    when: distro >= rhel-10 and distro < rhel-10.3
+    because: the bug is not yet fixed there
+id: 97a1a835-15a4-4d42-92ef-88ca1022ddc8
+extra-nitrate: TC#0620361
