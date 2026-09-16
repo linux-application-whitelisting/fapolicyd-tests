@@ -17,4 +17,5 @@ adjust+:
   - enabled: false
     when: distro < rhel-9
     because: the option is not implemented there
-
+extra-nitrate: TC#0620344
+id: 17af0d04-9eb0-4149-803b-072290c4eff1

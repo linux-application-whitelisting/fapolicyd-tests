@@ -31,3 +31,4 @@ adjust+:
     when: distro >= rhel-10 and distro < rhel-10.2
     because: the fix is not yet available there
 id: 23304c4d-33ba-434e-9eeb-09658e9c4906
+extra-nitrate: TC#0620346
