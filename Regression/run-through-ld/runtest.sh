@@ -54,9 +54,10 @@ rlJournalStart
 
   rlPhaseStartTest "check rules expansion" && {
     rlRun "grep -R 'path= ' /usr/share/fapolicyd" 1-255
-    ld=$(realpath -e $(readelf -e /usr/bin/bash | grep interpreter | grep -o '\s\S*/lib[^ ]*ld[^ ]*\.so[^] ]*'))
-    rlRun "grep -R 'path=${ld}' /usr/share/fapolicyd"
-    grep -R . /usr/share/fapolicyd/sample-rules/*.rules
+    if rlTestVersion "$(rpm -q --qf '%{version}' fapolicyd)" '<' '2.0.2'; then
+      ld=$(realpath -e $(readelf -e /usr/bin/bash | grep interpreter | grep -o '\s\S*/lib[^ ]*ld[^ ]*\.so[^] ]*'))
+      rlRun "grep -R 'path=${ld}' /usr/share/fapolicyd" 0 "rules contain the expanded runtime linker path"
+    fi
   rlPhaseEnd; }
 
   rlPhaseStartTest "direct execution" && {
