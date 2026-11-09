@@ -3,7 +3,7 @@ discover:
     how: fmf
     modified-only: true
     modified-url: https://github.com/linux-application-whitelisting/fapolicyd-tests
-    modified-ref: main
+    modified-ref: reference/main
 execute:
     how: tmt
 
